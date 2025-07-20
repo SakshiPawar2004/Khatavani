@@ -1,0 +1,449 @@
+/* Custom styles for the ledger book */
+.marathi-font {
+  font-family: Arial, 'Baloo Bhai 2', 'Devanagari', sans-serif;
+  font-size: 14px;
+}
+
+.english-font {
+  font-family: Arial, 'Inter', sans-serif;
+  font-size: 14px;
+}
+
+.ledger-border {
+  border: 2px solid #92400e;
+}
+
+.ledger-line {
+  border-bottom: 1px solid #d97706;
+}
+
+.account-row:hover {
+  background-color: #fef3c7;
+  transition: background-color 0.2s ease;
+}
+
+.ledger-table th {
+  background-color: #f59e0b;
+  color: #78350f;
+  font-weight: 600;
+}
+
+.ledger-table td {
+  border-right: 1px solid #d97706;
+  border-bottom: 1px solid #d97706;
+}
+
+.page-shadow {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Text wrapping for long content */
+.text-wrap {
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  white-space: pre-wrap;
+  max-width: 100%;
+}
+
+/* Combined Header with New School Building Background */
+.combined-header {
+  background: url('/files_4350074-1751206307455-image.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9);
+  position: relative;
+  overflow: hidden;
+}
+
+.combined-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1;
+}
+
+.combined-header * {
+  position: relative;
+  z-index: 2;
+}
+
+/* School Header Section - No border line */
+.school-header-section {
+  text-align: center;
+  padding: 12px 8px;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Main Header Section */
+.main-header-section {
+  padding: 16px;
+}
+
+/* A4 Print Styles */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  
+  body {
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  .container {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .page-shadow {
+    box-shadow: none !important;
+  }
+  
+  .bg-gradient-to-br {
+    background: white !important;
+  }
+  
+  .rounded-lg {
+    border-radius: 0 !important;
+  }
+  
+  /* Combined header styling for print */
+  .combined-header {
+    background: #f5f5f5 !important;
+    color: black !important;
+    text-shadow: none !important;
+    page-break-after: avoid !important;
+    border: 2px solid black !important;
+  }
+  
+  .combined-header::before {
+    display: none !important;
+  }
+  
+  .school-header-section {
+    color: black !important;
+  }
+  
+  /* Hide delete buttons during print */
+  .delete-btn {
+    display: none !important;
+  }
+  
+  /* Optimize Table of Contents for 2-page layout */
+  .grid-cols-1.lg\\:grid-cols-2 {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.5rem !important;
+  }
+  
+  /* Make table cells more compact for खातेवही सूची */
+  .print\\:text-\\[6px\\] {
+    font-size: 6px !important;
+  }
+  
+  .print\\:p-0\\.5 {
+    padding: 1px !important;
+  }
+  
+  .print\\:leading-tight {
+    line-height: 1.1 !important;
+  }
+  
+  /* Ensure proper page breaks for खातेवही सूची */
+  .print\\:page-break-after-always {
+    page-break-after: always !important;
+  }
+  
+  .print\\:page-break-before-always {
+    page-break-before: always !important;
+  }
+  
+  table {
+    font-size: 14px !important;
+    border-collapse: collapse !important;
+    width: 100% !important;
+    table-layout: fixed !important;
+    border: 1px solid black !important;
+  }
+  
+  th, td {
+    padding: 4px !important;
+    border: 1px solid black !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    vertical-align: top !important;
+    background-color: white !important;
+    color: black !important;
+  }
+  
+  /* Remove all background colors in print */
+  .bg-amber-600,
+  .bg-amber-500,
+  .bg-blue-100,
+  .bg-green-100,
+  .bg-red-100,
+  .bg-gray-100,
+  .bg-gray-200,
+  .bg-gray-300,
+  .bg-gray-400,
+  .bg-gray-800,
+  .bg-gray-900 {
+    background-color: white !important;
+    color: black !important;
+  }
+  
+  /* Table headers in black and white */
+  thead th {
+    background-color: #f0f0f0 !important;
+    color: black !important;
+    font-weight: bold !important;
+    border: 1px solid black !important;
+  }
+  
+  /* Daily total rows */
+  .daily-total-row {
+    background-color: #f5f5f5 !important;
+    color: black !important;
+    font-weight: bold !important;
+    border: 1px solid black !important;
+  }
+  
+  /* Balance row styling */
+  .balance-row {
+    background-color: #e8e8e8 !important;
+    color: black !important;
+    font-weight: bold !important;
+    border: 1px solid black !important;
+  }
+  
+  /* Set specific column widths for better text wrapping */
+  .details-column {
+    width: 25% !important;
+    max-width: 25% !important;
+  }
+  
+  .date-column {
+    width: 8% !important;
+    max-width: 8% !important;
+  }
+  
+  .account-column {
+    width: 6% !important;
+    max-width: 6% !important;
+  }
+  
+  .receipt-column {
+    width: 8% !important;
+    max-width: 8% !important;
+  }
+  
+  .amount-column {
+    width: 10% !important;
+    max-width: 10% !important;
+  }
+  
+  .print\\:hidden {
+    display: none !important;
+  }
+  
+  .print\\:block {
+    display: block !important;
+  }
+  
+  .print\\:text-xs {
+    font-size: 12px !important;
+  }
+  
+  .print\\:text-\\[8px\\] {
+    font-size: 14px !important;
+  }
+  
+  .print\\:text-\\[10px\\] {
+    font-size: 14px !important;
+  }
+  
+  .print\\:p-1 {
+    padding: 2px !important;
+  }
+  
+  .print\\:mb-2 {
+    margin-bottom: 4px !important;
+  }
+  
+  .print\\:mb-4 {
+    margin-bottom: 8px !important;
+  }
+  
+  .print\\:px-2 {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+  
+  .print\\:py-2 {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+  
+  .print\\:border {
+    border: 1px solid #000 !important;
+  }
+  
+  .print\\:border-gray-400 {
+    border-color: #000 !important;
+  }
+  
+  .print\\:border-gray-300 {
+    border-color: #000 !important;
+  }
+  
+  .print\\:bg-gray-800 {
+    background-color: #f0f0f0 !important;
+    color: black !important;
+  }
+  
+  .print\\:bg-gray-200 {
+    background-color: white !important;
+    color: black !important;
+  }
+  
+  .print\\:bg-gray-300 {
+    background-color: white !important;
+    color: black !important;
+  }
+  
+  .print\\:bg-gray-400 {
+    background-color: white !important;
+    color: black !important;
+  }
+  
+  .print\\:bg-gray-100 {
+    background-color: white !important;
+    color: black !important;
+  }
+  
+  .print\\:bg-gray-50 {
+    background-color: white !important;
+    color: black !important;
+  }
+  
+  .print\\:col-span-4 {
+    grid-column: span 4 / span 4 !important;
+  }
+  
+  .print\\:col-span-8 {
+    grid-column: span 8 / span 8 !important;
+  }
+  
+  .print\\:no-underline {
+    text-decoration: none !important;
+  }
+  
+  .print\\:hover\\:bg-transparent:hover {
+    background-color: transparent !important;
+  }
+  
+  .print\\:text-base {
+    font-size: 14px !important;
+  }
+  
+  .print\\:text-lg {
+    font-size: 16px !important;
+  }
+  
+  .print\\:w-3 {
+    width: 8px !important;
+  }
+  
+  .print\\:h-3 {
+    height: 8px !important;
+  }
+  
+  .print\\:shadow-none {
+    box-shadow: none !important;
+  }
+  
+  .print\\:border-0 {
+    border: none !important;
+  }
+  
+  .print\\:rounded-none {
+    border-radius: 0 !important;
+  }
+  
+  /* Ensure proper page breaks */
+  @page {
+    margin: 0.3in;
+    size: A4;
+  }
+  
+  /* Prevent breaking inside table rows */
+  tr {
+    page-break-inside: avoid;
+  }
+  
+  /* Keep table headers with content */
+  thead {
+    display: table-header-group;
+  }
+  
+  /* Ensure text wrapping in cells */
+  td, th {
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+  
+  /* Preserve whitespace formatting for details */
+  .whitespace-pre-line {
+    white-space: pre-line !important;
+  }
+  
+  /* Compact grid layout for खातेवही सूची */
+  .print\\:grid-cols-2 {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.25rem !important;
+  }
+  
+  /* Force smaller text for account names to fit better */
+  .print\\:text-\\[5px\\] {
+    font-size: 12px !important;
+  }
+  
+  /* Adjust column spans for better fit */
+  .print\\:col-span-2 {
+    grid-column: span 2 / span 2 !important;
+  }
+  
+  .print\\:col-span-6 {
+    grid-column: span 6 / span 6 !important;
+  }
+}
+
+/* Compact layout for A4 */
+.compact-layout {
+  font-size: 14px;
+}
+
+.compact-layout table {
+  font-size: 14px;
+}
+
+.compact-layout th,
+.compact-layout td {
+  padding: 4px;
+}
