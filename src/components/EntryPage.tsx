@@ -831,14 +831,14 @@ const EntryPage: React.FC = () => {
                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-medium english-font transition-colors inline-flex items-center gap-2"
               >
                 <Download className="w-5 h-5" />
-                Excel निर्यात (Export to Excel)
+                किर्द Excel
               </button>
               <button
                 onClick={handlePrint}
                 className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium english-font transition-colors inline-flex items-center gap-2"
               >
                 <Printer className="w-5 h-5" />
-                प्रिंट करा (Print Entries)
+                किर्द प्रिंट (Print Entries)
               </button>
             </div>
           </div>

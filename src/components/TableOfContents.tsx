@@ -360,8 +360,8 @@ const TableOfContents: React.FC = () => {
                   }
                 }}
               >
-                <Plus className="w-5 h-5" />
-                नवीन नोंद जोडा (Add New Entry)
+                <Edit3 className="w-5 h-5" />
+                किर्द लिहा / बघा
               </Link>
               <button
                 onClick={() => {
@@ -378,9 +378,8 @@ const TableOfContents: React.FC = () => {
                     : 'bg-gray-400 text-gray-600 cursor-not-allowed'
                 }`}
               >
-                <Edit3 className="w-5 h-5" />
-                नवीन खाते जोडा (Add New Account)
-              </button>
+                <Plus className="w-5 h-5" />
+                खाते जोडा 
             </div>
           )}
 
@@ -636,14 +635,14 @@ const TableOfContents: React.FC = () => {
                       className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-medium english-font transition-colors inline-flex items-center gap-2"
                     >
                       <Download className="w-5 h-5" />
-                     खतावणी अनुक्रमणिका Excel निर्यात (Export Accounts List)
+                     खतावणी अनुक्रमणिका
                     </button>
                     <button
                       onClick={handleExportAllAccountsTransactions}
                       className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium english-font transition-colors inline-flex items-center gap-2"
                     >
                       <Download className="w-5 h-5" />
-                      सर्व खाती व्यवहार निर्यात (Export All Accounts Transactions)
+                      खतावणी Excel
                     </button>
                   </div>
                 </div>
