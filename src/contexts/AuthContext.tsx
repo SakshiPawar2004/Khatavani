@@ -10,8 +10,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Static admin credentials (in production, use environment variables)
 const ADMIN_CREDENTIALS = {
-  username: 'admin',
-  password: 'admin123'
+  username: 'tzpmv',
+  password: 'tzpmv97'
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
