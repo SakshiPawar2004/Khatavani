@@ -343,45 +343,47 @@ const TableOfContents: React.FC = () => {
             <div className="mt-4 h-0.5 bg-amber-600 print:hidden"></div>
           </div>
 
-          {/* Action Buttons */}
-          {isAdmin && (
-            <div className="text-center mb-6 flex flex-wrap gap-4 justify-center print:hidden">
-              <Link
-                to="/entry"
-                className={`px-6 py-3 rounded-lg font-medium english-font transition-colors inline-flex items-center gap-2 ${
-                  isOnline 
-                    ? 'bg-green-600 hover:bg-green-700 text-white' 
-                    : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                }`}
-                onClick={(e) => {
-                  if (!isOnline) {
-                    e.preventDefault();
-                    alert('इंटरनेट कनेक्शन नाही! कृपया ऑनलाइन येऊन पुन्हा प्रयत्न करा.');
-                  }
-                }}
-              >
-                <Edit3 className="w-5 h-5" />
-                किर्द लिहा / बघा
-              </Link>
-              <button
-                onClick={() => {
-                  if (!isOnline) {
-                    alert('इंटरनेट कनेक्शन नाही! कृपया ऑनलाइन येऊन पुन्हा प्रयत्न करा.');
-                    return;
-                  }
-                  setShowAddForm(!showAddForm);
-                }}
-                disabled={!isOnline}
-                className={`px-6 py-3 rounded-lg font-medium english-font transition-colors inline-flex items-center gap-2 ${
-                  isOnline 
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                    : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                }`}
-              >
-                <Plus className="w-5 h-5" />
-                खाते जोडा 
-            </div>
-          )}
+{/* Action Buttons */}
+{isAdmin && (
+  <div className="text-center mb-6 flex flex-wrap gap-4 justify-center print:hidden">
+    <Link
+      to="/entry"
+      className={`px-6 py-3 rounded-lg font-medium english-font transition-colors inline-flex items-center gap-2 ${
+        isOnline 
+          ? 'bg-green-600 hover:bg-green-700 text-white' 
+          : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+      }`}
+      onClick={(e) => {
+        if (!isOnline) {
+          e.preventDefault();
+          alert('इंटरनेट कनेक्शन नाही! कृपया ऑनलाइन येऊन पुन्हा प्रयत्न करा.');
+        }
+      }}
+    >
+      <Edit3 className="w-5 h-5" />
+      किर्द लिहा / बघा
+    </Link>
+    <button
+      onClick={() => {
+        if (!isOnline) {
+          alert('इंटरनेट कनेक्शन नाही! कृपया ऑनलाइन येऊन पुन्हा प्रयत्न करा.');
+          return;
+        }
+        setShowAddForm(!showAddForm);
+      }}
+      disabled={!isOnline}
+      className={`px-6 py-3 rounded-lg font-medium english-font transition-colors inline-flex items-center gap-2 ${
+        isOnline 
+          ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+          : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+      }`}
+    >
+      <Plus className="w-5 h-5" />
+      खाते जोडा 
+    </button>
+  </div>
+)}
+
 
           {/* Add Account Form */}
           {showAddForm && isOnline && isAdmin && (
