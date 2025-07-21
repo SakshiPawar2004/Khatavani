@@ -23,7 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment variables
+# Environment variables - NEVER commit these files
 .env
 .env.local
 .env.development.local
@@ -32,5 +32,19 @@ dist-ssr
 
 # Firebase
 .firebase
+.firebaserc
 firebase-debug.log
-firestore-debug.log
+firebase-debug.*.log
+
+# OS generated files
+Thumbs.db
+.DS_Store
+
+# IDE files
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
