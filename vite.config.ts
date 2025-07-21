@@ -9,3 +9,4 @@ export default defineConfig({
     allowedHosts: ['ledgerbook-zl4s.onrender.com', 'khatavani.onrender.com']
   }
 });
+
