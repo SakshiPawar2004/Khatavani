@@ -1,144 +1,226 @@
-# Firebase Setup Guide for Marathi Ledger Book
+# Marathi Ledger Book (किर्दवही)
 
-## Step 1: Create Firebase Project
+A digital ledger book application for schools and organizations to manage accounts and financial entries in Marathi language.
 
-1. **Go to Firebase Console**
-   - Visit: https://console.firebase.google.com/
-   - Sign in with your Google account
+## Features
 
-2. **Create New Project**
-   - Click "Create a project"
-   - Enter project name: `marathi-ledger-book`
-   - Enable Google Analytics (optional)
-   - Click "Create project"
+- **Account Management**: Create and manage multiple accounts
+- **Entry Management**: Add जमा (credit) and नावे (debit) entries
+- **Ledger Views**: View individual account ledgers and complete transaction history
+- **Admin Dashboard**: Secure admin interface for full management
+- **Export Functionality**: Export data to Excel format
+- **Print Support**: Print-friendly layouts for physical records
+- **Responsive Design**: Works on desktop and mobile devices
+- **Firebase Integration**: Cloud-based data storage and real-time sync
 
-## Step 2: Setup Firestore Database
+## Prerequisites
 
-1. **Create Firestore Database**
-   - In Firebase Console, go to "Firestore Database"
-   - Click "Create database"
-   - Choose "Start in test mode" (for development)
-   - Select a location closest to your users
-   - Click "Done"
+Before running this project, make sure you have the following installed:
 
-2. **Configure Security Rules (Optional - for production)**
-   ```javascript
-   rules_version = '2';
-   service cloud.firestore {
-     match /databases/{database}/documents {
-       // Allow read/write access to all documents
-       match /{document=**} {
-         allow read, write: if true;
-       }
-     }
-   }
+- **Node.js** (version 16 or higher)
+- **npm** (comes with Node.js)
+- **Git** (optional, for cloning)
+
+## Installation & Setup
+
+### 1. Download/Clone the Project
+
+**Option A: Download ZIP**
+- Download the project folder
+- Extract it to your desired location
+
+**Option B: Clone with Git**
+```bash
+git clone <repository-url>
+cd marathi-ledger-book
+```
+
+### 2. Install Dependencies
+
+Open terminal/command prompt in the project folder and run:
+
+```bash
+npm install
+```
+
+This will install all required dependencies including:
+- React
+- TypeScript
+- Tailwind CSS
+- Firebase
+- React Router
+- Lucide React (icons)
+- XLSX (Excel export)
+
+### 3. Firebase Setup (Required)
+
+The application uses Firebase for data storage. Follow these steps:
+
+1. **Create Firebase Project**:
+   - Go to [Firebase Console](https://console.firebase.google.com/)
+   - Create a new project
+   - Enable Firestore Database
+
+2. **Get Firebase Configuration**:
+   - In Firebase Console, go to Project Settings
+   - Add a web app
+   - Copy the configuration object
+
+3. **Setup Environment Variables**:
+   - Copy `.env.example` to `.env`:
+     ```bash
+     cp .env.example .env
+     ```
+   - Open `.env` file and replace the placeholder values with your actual Firebase configuration:
+
+   ```env
+   VITE_FIREBASE_API_KEY=your-actual-api-key
+   VITE_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=your-actual-project-id
+   VITE_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your-actual-sender-id
+   VITE_FIREBASE_APP_ID=your-actual-app-id
+   VITE_FIREBASE_MEASUREMENT_ID=your-actual-measurement-id
    ```
 
-## Step 3: Get Firebase Configuration
+   **Important**: Never commit the `.env` file to version control. It's already added to `.gitignore`.
 
-1. **Add Web App**
-   - In Firebase Console, click the web icon (</>) to add a web app
-   - Enter app nickname: `marathi-ledger-web`
-   - Don't check "Firebase Hosting" for now
-   - Click "Register app"
-
-2. **Copy Configuration**
-   - Copy the Firebase configuration object
-   - It will look like this:
-   ```javascript
-   const firebaseConfig = {
-     apiKey: "your-api-key-here",
-     authDomain: "your-project-id.firebaseapp.com",
-     projectId: "your-project-id",
-     storageBucket: "your-project-id.appspot.com",
-     messagingSenderId: "123456789",
-     appId: "your-app-id-here"
-   };
-   ```
-
-## Step 4: Update Firebase Configuration
-
-1. **Update Configuration File**
-   - Open `src/config/firebase.ts`
-   - Replace the placeholder values with your actual Firebase config:
-
-   ```typescript
-   const firebaseConfig = {
-     apiKey: "your-actual-api-key",
-     authDomain: "your-project-id.firebaseapp.com",
-     projectId: "your-actual-project-id",
-     storageBucket: "your-project-id.appspot.com",
-     messagingSenderId: "your-actual-sender-id",
-     appId: "your-actual-app-id"
-   };
-   ```
-
-## Step 5: Test the Connection
-
-1. **Start Development Server**
-   ```bash
-   npm run dev
-   ```
-
-2. **Test Account Management**
-   - Go to http://localhost:5173
-   - Try adding a new account
-   - Check Firebase Console > Firestore Database to see if data appears
-
-3. **Test Entry Management**
-   - Go to "नवीन नोंद जोडा" page
-   - Add जमा and नावे entries
-   - Verify entries appear in Firebase Console
-
-## Step 6: Firestore Collections Structure
-
-The app will automatically create these collections:
-
-### Accounts Collection (`accounts`)
+4. **Set Firestore Rules** (for development):
 ```javascript
-{
-  id: "auto-generated-id",
-  khateNumber: "1",
-  name: "राम शर्मा",
-  createdAt: Timestamp
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
 }
 ```
 
-### Entries Collection (`entries`)
-```javascript
-{
-  id: "auto-generated-id",
-  date: "2025-01-15",
-  accountNumber: "1",
-  receiptNumber: "R001",
-  details: "राम शर्मा\nपैसे जमा केले",
-  amount: 1000.00,
-  type: "जमा",
-  createdAt: Timestamp
-}
+## Running the Application
+
+### Development Mode
+
+To start the development server:
+
+```bash
+npm run dev
 ```
 
-## Features Available with Firebase
+The application will be available at: `http://localhost:5173`
 
-✅ **Real-time Sync**: Data syncs across all devices instantly
-✅ **Cloud Storage**: All data stored securely in Google Cloud
-✅ **Offline Support**: Basic offline functionality with Firebase SDK
-✅ **Scalability**: Handles thousands of accounts and entries
-✅ **Backup**: Automatic cloud backup of all data
-✅ **Multi-device**: Access from any device with internet
-✅ **Data Validation**: Server-side validation and security
-✅ **Error Handling**: Comprehensive error handling for network issues
+### Building for Production
+
+To create a production build:
+
+```bash
+npm run build
+```
+
+The built files will be in the `dist` folder.
+
+### Preview Production Build
+
+To preview the production build locally:
+
+```bash
+npm run preview
+```
+
+## Usage
+
+### For Regular Users
+
+1. **Access the Application**: Open `http://localhost:5173`
+2. **View Accounts**: See the list of all accounts (खतावणी अनुक्रमणिका)
+3. **View Ledger**: Click "किर्दवही बघा" to see all transactions
+4. **View Individual Account**: Click on any account to see its detailed ledger
+
+### For Administrators
+
+1. **Admin Login**: Go to `http://localhost:5173/admin/login`
+2. **Login Credentials**:
+   - Username: `admin`
+   - Password: `admin123`
+3. **Admin Features**:
+   - Add new accounts
+   - Add जमा/नावे entries
+   - Edit/delete accounts and entries
+   - Export data to Excel
+   - Print reports
+
+## Project Structure
+
+```
+marathi-ledger-book/
+├── src/
+│   ├── components/          # React components
+│   │   ├── TableOfContents.tsx
+│   │   ├── LedgerPage.tsx
+│   │   ├── EntryPage.tsx
+│   │   ├── AdminLogin.tsx
+│   │   └── AdminDashboard.tsx
+│   ├── contexts/           # React contexts
+│   │   └── AuthContext.tsx
+│   ├── services/          # Firebase services
+│   │   └── firebaseService.ts
+│   ├── config/           # Configuration files
+│   │   └── firebase.ts
+│   └── App.tsx           # Main app component
+├── public/              # Static assets
+├── package.json        # Dependencies and scripts
+└── README.md          # This file
+```
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+## Features Overview
+
+### Account Management
+- Create accounts with unique numbers and names
+- Edit account names
+- Delete accounts (removes all related entries)
+- Numerical sorting (1,2,3...10,11,12)
+
+### Entry Management
+- Add जमा (credit) entries
+- Add नावे (debit) entries
+- Auto-fill account names
+- Receipt number tracking
+- Detailed descriptions
+
+### Reports & Export
+- Individual account ledgers
+- Complete transaction history
+- Excel export functionality
+- Print-friendly layouts
+- Balance calculations
+
+### Security
+- Admin authentication
+- Protected routes
+- Session management
+- User/admin role separation
 
 ## Security Best Practices
 
 ### For Production Use:
 
-1. **Update Security Rules**
+1. **Environment Variables**:
+   - Never commit `.env` files to version control
+   - Use secure environment variable management in production
+   - Rotate API keys regularly
+
+1. **Update Security Rules**:
    ```javascript
    rules_version = '2';
    service cloud.firestore {
      match /databases/{database}/documents {
-       // Only allow authenticated users
        match /{document=**} {
          allow read, write: if request.auth != null;
        }
@@ -146,61 +228,69 @@ The app will automatically create these collections:
    }
    ```
 
-2. **Enable Authentication** (Optional)
-   - Go to Firebase Console > Authentication
-   - Enable Email/Password or Google Sign-in
-   - Update security rules to require authentication
+2. **Change Default Admin Credentials**:
+   - Update admin username and password
+   - Use strong passwords
+   - Consider implementing proper authentication
 
-3. **Restrict API Keys**
-   - Go to Google Cloud Console
-   - Restrict API keys to specific domains
-   - Enable only necessary APIs
+3. **Enable Firebase Security Features**:
+   - Enable App Check
+   - Set up proper authentication
+   - Monitor usage and set quotas
 
 ## Troubleshooting
 
-1. **Permission Denied Error**
+1. **Permission Denied Error**:
    - Check Firestore security rules
    - Ensure rules allow read/write access
    - Verify project configuration
 
-2. **Network Errors**
+2. **Environment Variables Error**:
+   - Ensure `.env` file exists in project root
+   - Check that all required variables are set
+   - Restart development server after changing `.env`
+   - Variables must start with `VITE_` prefix for Vite
+
+2. **Network Errors**:
    - Check internet connection
    - Verify Firebase project is active
    - Check browser console for detailed errors
 
-3. **Data Not Syncing**
-   - Check Firebase Console for data
-   - Verify collection names match code
-   - Check browser network tab for failed requests
+### Common Issues
 
-## Monitoring and Analytics
+1. **Firebase Connection Error**:
+   - Check your Firebase configuration
+   - Ensure Firestore is enabled
+   - Verify internet connection
 
-1. **Firebase Console Dashboard**
-   - Monitor database usage
-   - Track read/write operations
-   - View error logs
+2. **Dependencies Error**:
+   ```bash
+   rm -rf node_modules package-lock.json
+   npm install
+   ```
 
-2. **Performance Monitoring**
-   - Enable Performance Monitoring in Firebase
-   - Track app performance metrics
-   - Monitor user engagement
+3. **Port Already in Use**:
+   - The app will automatically try different ports
+   - Or specify a port: `npm run dev -- --port 3000`
 
-## Backup and Export
+### Browser Requirements
 
-1. **Automatic Backups**
-   - Firebase automatically backs up your data
-   - Data is replicated across multiple regions
+- Modern browsers (Chrome, Firefox, Safari, Edge)
+- JavaScript enabled
+- Internet connection (for Firebase)
 
-2. **Manual Export**
-   - Use Firebase CLI to export data
-   - Export to JSON format for local backup
+## Support
 
-Your Marathi Ledger Book is now connected to Firebase! 🚀
+For issues or questions:
+1. Check the browser console for error messages
+2. Verify Firebase setup
+3. Ensure all dependencies are installed
+4. Check internet connection
 
-## Next Steps
+## License
 
-- Test all functionality with Firebase
-- Set up proper security rules for production
-- Consider enabling Firebase Authentication
-- Monitor usage in Firebase Console
-- Set up automated backups if needed
+This project is for educational and organizational use.
+
+---
+
+**Note**: Make sure to keep your Firebase credentials secure and never commit them to public repositories.
