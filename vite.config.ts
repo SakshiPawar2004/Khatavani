@@ -6,6 +6,6 @@ export default defineConfig({
   preview: {
     host: true,
     port: 4173,
-    allowedHosts: ['ledgerbook-zl4s.onrender.com']
+    allowedHosts: ['ledgerbook-zl4s.onrender.com', 'khatavani.onrender.com']
   }
 });
