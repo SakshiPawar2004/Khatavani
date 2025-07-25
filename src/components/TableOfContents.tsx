@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { BookOpen, Plus, Edit3, Edit, Trash2, Save, X, Download, Wifi, WifiOff, FileText } from 'lucide-react';
+import { BookOpen, Plus, Edit3, Edit, Trash2, Save, X, Download, Wifi, WifiOff, FileText, LogOut } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { accountsFirebase, entriesFirebase, Account, Entry, handleFirebaseError } from '../services/firebaseService';
 
@@ -15,7 +15,7 @@ const TableOfContents: React.FC = () => {
   const [editingAccount, setEditingAccount] = useState<string | null>(null);
   const [editAccountName, setEditAccountName] = useState('');
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const { isAdmin } = useAuth();
+  const { isAdmin, logout } = useAuth();
 
   // Monitor online/offline status
   useEffect(() => {
@@ -100,6 +100,9 @@ const TableOfContents: React.FC = () => {
         setEditingAccount(null);
         setEditAccountName('');
         loadAccounts(); // Reload accounts
+        
+        // Trigger a page refresh to update account names in other components
+        window.dispatchEvent(new Event('accountUpdated'));
       } catch (err) {
         alert('खाते अपडेट करताना त्रुटी: ' + handleFirebaseError(err));
       }
@@ -314,10 +317,37 @@ const TableOfContents: React.FC = () => {
         {/* Main Header Section */}
         <div className="main-header-section print:hidden">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-center gap-3">
-              <BookOpen className="w-8 h-8" />
-              <h1 className="text-3xl md:text-4xl font-bold marathi-font">किर्दवही</h1>
-            </div>
+<div
+  className={`flex items-center ${
+    isAdmin ? 'justify-between' : 'justify-center'
+  }`}
+>
+  {isAdmin ? (
+    <>
+      <div></div>
+      <div className="flex items-center gap-3">
+        <BookOpen className="w-8 h-8" />
+        <h1 className="text-3xl md:text-4xl font-bold marathi-font">किर्दवही</h1>
+      </div>
+      <button
+        onClick={() => {
+          logout();
+          window.location.href = '/admin/login';
+        }}
+        className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs font-medium transition-colors flex items-center gap-1"
+      >
+        <LogOut className="w-3 h-3" />
+        Logout
+      </button>
+    </>
+  ) : (
+    <div className="flex items-center gap-3">
+      <BookOpen className="w-8 h-8" />
+      <h1 className="text-3xl md:text-4xl font-bold marathi-font">किर्दवही</h1>
+    </div>
+  )}
+</div>
+
             <p className="text-center text-white mt-2 english-font">Marathi Ledger Book</p>
           </div>
         </div>
@@ -332,6 +362,11 @@ const TableOfContents: React.FC = () => {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8 print:px-1 print:py-1">
+        {/* Print-only Account List Header */}
+        <div className="hidden print:block text-center mb-4">
+          <h2 className="text-lg font-bold marathi-font">खतावणी अनुक्रमणिका</h2>
+        </div>
+        
         <div className="bg-white rounded-lg page-shadow ledger-border p-6 md:p-8 print:shadow-none print:border-0 print:rounded-none print:p-1">
           {/* Page Header */}
           <div className="text-center mb-8 print:mb-2">
@@ -343,47 +378,46 @@ const TableOfContents: React.FC = () => {
             <div className="mt-4 h-0.5 bg-amber-600 print:hidden"></div>
           </div>
 
-{/* Action Buttons */}
-{isAdmin && (
-  <div className="text-center mb-6 flex flex-wrap gap-4 justify-center print:hidden">
-    <Link
-      to="/entry"
-      className={`px-6 py-3 rounded-lg font-medium english-font transition-colors inline-flex items-center gap-2 ${
-        isOnline 
-          ? 'bg-green-600 hover:bg-green-700 text-white' 
-          : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-      }`}
-      onClick={(e) => {
-        if (!isOnline) {
-          e.preventDefault();
-          alert('इंटरनेट कनेक्शन नाही! कृपया ऑनलाइन येऊन पुन्हा प्रयत्न करा.');
-        }
-      }}
-    >
-      <Edit3 className="w-5 h-5" />
-      किर्द लिहा / बघा
-    </Link>
-    <button
-      onClick={() => {
-        if (!isOnline) {
-          alert('इंटरनेट कनेक्शन नाही! कृपया ऑनलाइन येऊन पुन्हा प्रयत्न करा.');
-          return;
-        }
-        setShowAddForm(!showAddForm);
-      }}
-      disabled={!isOnline}
-      className={`px-6 py-3 rounded-lg font-medium english-font transition-colors inline-flex items-center gap-2 ${
-        isOnline 
-          ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-          : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-      }`}
-    >
-      <Plus className="w-5 h-5" />
-      खाते जोडा 
-    </button>
-  </div>
-)}
-
+          {/* Action Buttons */}
+          {isAdmin && (
+            <div className="text-center mb-6 flex flex-wrap gap-4 justify-center print:hidden">
+              <Link
+                to="/entry"
+                className={`px-6 py-3 rounded-lg font-medium marathi-font transition-colors inline-flex items-center gap-2 ${
+                  isOnline 
+                    ? 'bg-green-600 hover:bg-green-700 text-white' 
+                    : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                }`}
+                onClick={(e) => {
+                  if (!isOnline) {
+                    e.preventDefault();
+                    alert('इंटरनेट कनेक्शन नाही! कृपया ऑनलाइन येऊन पुन्हा प्रयत्न करा.');
+                  }
+                }}
+              >
+                <FileText className="w-5 h-5" />
+                किर्द लिहा / बघा
+              </Link>
+              <button
+                onClick={() => {
+                  if (!isOnline) {
+                    alert('इंटरनेट कनेक्शन नाही! कृपया ऑनलाइन येऊन पुन्हा प्रयत्न करा.');
+                    return;
+                  }
+                  setShowAddForm(!showAddForm);
+                }}
+                disabled={!isOnline}
+                className={`px-6 py-3 rounded-lg font-medium marathi-font transition-colors inline-flex items-center gap-2 ${
+                  isOnline 
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                    : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                }`}
+              >
+                <Plus className="w-5 h-5" />
+                खाते जोडा
+              </button>
+            </div>
+          )}
 
           {/* Add Account Form */}
           {showAddForm && isOnline && isAdmin && (
@@ -475,7 +509,7 @@ const TableOfContents: React.FC = () => {
                     <div className="grid grid-cols-12 gap-2 font-semibold text-sm marathi-font print:text-[6px] print:gap-1">
                       <div className="col-span-3 print:col-span-2">खाते नं.</div>
                       <div className="col-span-7 print:col-span-8">नाव</div>
-                      <div className="col-span-2 print:hidden">कृती</div>
+                      {isAdmin && <div className="col-span-2 print:hidden">कृती</div>}
                     </div>
                   </div>
                   <div className="border-2 border-amber-500 border-t-0 rounded-b-lg print:border print:border-gray-400 print:rounded-none">
@@ -510,7 +544,7 @@ const TableOfContents: React.FC = () => {
                         ) : (
                           <div className="grid grid-cols-12 gap-2 p-3 text-sm print:p-0.5 print:text-[5px] print:gap-1 print:leading-tight">
                             <div className="col-span-3 font-medium text-amber-700 english-font print:col-span-2">{account.khateNumber}</div>
-                            <div className="col-span-7 text-gray-800 marathi-font hover:text-amber-700 transition-colors print:col-span-8">
+                            <div className={`${isAdmin ? 'col-span-7' : 'col-span-9'} text-gray-800 marathi-font hover:text-amber-700 transition-colors ${isAdmin ? 'print:col-span-8' : 'print:col-span-10'}`}>
                               <Link to={`/ledger/${account.khateNumber}`} className="block print:no-underline">
                                 {account.name}
                               </Link>
@@ -526,7 +560,7 @@ const TableOfContents: React.FC = () => {
                                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                   }`}
                                 >
-                                  <Edit className="w-3 h-3" />
+                                  <Edit3 className="w-3 h-3" />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteAccount(account)}
@@ -554,7 +588,7 @@ const TableOfContents: React.FC = () => {
                     <div className="grid grid-cols-12 gap-2 font-semibold text-sm marathi-font print:text-[6px] print:gap-1">
                       <div className="col-span-3 print:col-span-2">खाते नं.</div>
                       <div className="col-span-7 print:col-span-8">नाव</div>
-                      <div className="col-span-2 print:hidden">कृती</div>
+                      {isAdmin && <div className="col-span-2 print:hidden">कृती</div>}
                     </div>
                   </div>
                   <div className="border-2 border-amber-500 border-t-0 rounded-b-lg print:border print:border-gray-400 print:rounded-none">
@@ -589,7 +623,7 @@ const TableOfContents: React.FC = () => {
                         ) : (
                           <div className="grid grid-cols-12 gap-2 p-3 text-sm print:p-0.5 print:text-[5px] print:gap-1 print:leading-tight">
                             <div className="col-span-3 font-medium text-amber-700 english-font print:col-span-2">{account.khateNumber}</div>
-                            <div className="col-span-7 text-gray-800 marathi-font hover:text-amber-700 transition-colors print:col-span-8">
+                            <div className={`${isAdmin ? 'col-span-7' : 'col-span-9'} text-gray-800 marathi-font hover:text-amber-700 transition-colors ${isAdmin ? 'print:col-span-8' : 'print:col-span-10'}`}>
                               <Link to={`/ledger/${account.khateNumber}`} className="block print:no-underline">
                                 {account.name}
                               </Link>
@@ -605,7 +639,7 @@ const TableOfContents: React.FC = () => {
                                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                   }`}
                                 >
-                                  <Edit className="w-3 h-3" />
+                                  <Edit3 className="w-3 h-3" />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteAccount(account)}
@@ -634,14 +668,14 @@ const TableOfContents: React.FC = () => {
                   <div className="flex flex-wrap gap-4 justify-center">
                     <button
                       onClick={handleExportAccountsToExcel}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-medium english-font transition-colors inline-flex items-center gap-2"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-medium marathi-font transition-colors inline-flex items-center gap-2"
                     >
                       <Download className="w-5 h-5" />
-                     खतावणी अनुक्रमणिका
+                      खतावणी अनुक्रमणिका
                     </button>
                     <button
                       onClick={handleExportAllAccountsTransactions}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium english-font transition-colors inline-flex items-center gap-2"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium marathi-font transition-colors inline-flex items-center gap-2"
                     >
                       <Download className="w-5 h-5" />
                       खतावणी Excel
@@ -661,7 +695,7 @@ const TableOfContents: React.FC = () => {
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-medium marathi-font transition-colors inline-flex items-center gap-3 text-lg"
               >
                 <FileText className="w-6 h-6" />
-                किर्दवही बघा
+                किर्द लिहा / बघा
               </Link>
             </div>
           )}

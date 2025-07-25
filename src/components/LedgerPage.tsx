@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { ArrowLeft, FileText, Printer, Trash2, Download, Wifi, WifiOff } from 'lucide-react';
+import { ArrowLeft, FileText, Printer, Trash2, Download, Wifi, WifiOff, LogOut } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { accountsFirebase, entriesFirebase, Account, Entry, handleFirebaseError } from '../services/firebaseService';
 
@@ -12,7 +12,7 @@ const LedgerPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const { isAdmin } = useAuth();
+  const { isAdmin, logout } = useAuth();
   
   // Monitor online/offline status
   useEffect(() => {
@@ -33,6 +33,26 @@ const LedgerPage: React.FC = () => {
     loadData();
   }, [id]);
 
+  // Reload data when coming back to this page (to get updated account names)
+  useEffect(() => {
+    const handleFocus = () => {
+      loadData();
+    };
+    
+    // Listen for account name updates
+    const handleAccountUpdate = () => {
+      loadData();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('accountNameUpdated', handleAccountUpdate);
+    
+    return () => window.removeEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('accountNameUpdated', handleAccountUpdate);
+    };
+  }, []);
   const loadData = async () => {
     if (!id) return;
     
@@ -184,26 +204,40 @@ const LedgerPage: React.FC = () => {
                 <FileText className="w-6 h-6" />
                 <h1 className="text-xl md:text-2xl font-bold marathi-font">{accountName}</h1>
               </div>
-              <div className="text-right text-sm english-font">
-                <div>Account No: {id}</div>
-                <div>Balance: ₹{formatAmount(Math.abs(balance))}</div>
+              <div className="flex items-center gap-4">
+                <div className="text-right text-sm english-font">
+                  <div>Account No: {id}</div>
+                  <div>Balance: ₹{formatAmount(Math.abs(balance))}</div>
+                  {isAdmin && (
+                    <div className="flex gap-2 mt-1">
+                    <button
+                      onClick={handlePrint}
+                      className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-xs transition-colors inline-flex items-center gap-1"
+                    >
+                      <Printer className="w-3 h-3" />
+                      Print
+                    </button>
+                    <button
+                      onClick={handleExportToExcel}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded text-xs transition-colors inline-flex items-center gap-1"
+                    >
+                      <Download className="w-3 h-3" />
+                      Excel
+                    </button>
+                    </div>
+                  )}
+                </div>
                 {isAdmin && (
-                  <div className="flex gap-2 mt-1">
                   <button
-                    onClick={handlePrint}
-                    className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-xs transition-colors inline-flex items-center gap-1"
+                    onClick={() => {
+                      logout();
+                      window.location.href = '/admin/login';
+                    }}
+                    className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs font-medium transition-colors flex items-center gap-1"
                   >
-                    <Printer className="w-3 h-3" />
-                    Print
+                    <LogOut className="w-3 h-3" />
+                    Logout
                   </button>
-                  <button
-                    onClick={handleExportToExcel}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded text-xs transition-colors inline-flex items-center gap-1"
-                  >
-                    <Download className="w-3 h-3" />
-                    Excel
-                  </button>
-                  </div>
                 )}
               </div>
             </div>
@@ -220,6 +254,11 @@ const LedgerPage: React.FC = () => {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8 print:px-2 print:py-2">
+        {/* Print-only Account Name Header */}
+        <div className="hidden print:block text-center mb-4">
+          <h2 className="text-lg font-bold marathi-font">{accountName}</h2>
+        </div>
+        
         {/* Simplified Ledger Table - Like Second Photo */}
         {accountEntries.length > 0 ? (
           <div className="bg-white rounded-lg page-shadow ledger-border overflow-hidden print:shadow-none print:border-0 print:rounded-none">
@@ -228,7 +267,7 @@ const LedgerPage: React.FC = () => {
                 <thead>
                   <tr className="bg-amber-600 text-white print:bg-gray-100 print:text-black">
                     <th className="p-2 text-left marathi-font border border-black">तारीख</th>
-                    <th className="p-2 text-left marathi-font border border-black">पावती नं.</th>
+                    <th className="p-2 text-left marathi-font border border-black">खाते नं.</th>
                     <th className="p-2 text-left marathi-font border border-black">तपशील</th>
                     <th className="p-2 text-right marathi-font border border-black">जमा रक्कम</th>
                     <th className="p-2 text-right marathi-font border border-black">नावे रक्कम</th>
@@ -242,7 +281,7 @@ const LedgerPage: React.FC = () => {
                           {new Date(entry.date).toLocaleDateString('en-IN')}
                         </td>
                         <td className="p-2 marathi-font border border-black">
-                          {entry.receiptNumber || '-'}
+                          {entry.accountNumber}
                         </td>
                         <td className="p-2 marathi-font leading-relaxed border border-black text-wrap">
                           {entry.details}

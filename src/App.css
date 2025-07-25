@@ -47,6 +47,12 @@
   max-width: 100%;
 }
 
+/* Center align content in table cells */
+.align-middle {
+  vertical-align: middle !important;
+  text-align: center !important;
+}
+
 /* Combined Header with New School Building Background */
 .combined-header {
   background: url('/files_4350074-1751206307455-image.png');
