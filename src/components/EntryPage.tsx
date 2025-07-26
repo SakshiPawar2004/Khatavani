@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { ArrowLeft, Save, X, BookOpen, Printer, Trash2, Plus, Download, Wifi, WifiOff, LogOut } from 'lucide-react';
+import { ArrowLeft, Save, X, BookOpen, Printer, Edit3, Plus, Download, Wifi, WifiOff, LogOut } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { accountsFirebase, entriesFirebase, Account, Entry, handleFirebaseError } from '../services/firebaseService';
 
@@ -29,6 +29,14 @@ const EntryPage: React.FC = () => {
   const [showAddAccountForm, setShowAddAccountForm] = useState(false);
   const [newAccountName, setNewAccountName] = useState('');
   const [newAccountNumber, setNewAccountNumber] = useState('');
+  const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    date: '',
+    accountNumber: '',
+    receiptNumber: '',
+    details: '',
+    amount: ''
+  });
   const { isAdmin, logout } = useAuth();
 
   // Monitor online/offline status
@@ -267,20 +275,91 @@ const EntryPage: React.FC = () => {
     });
   };
 
-  const handleDeleteEntry = async (entryId: string) => {
+  const handleEditEntry = (entry: Entry) => {
+    setEditingEntry(entry);
+    setEditFormData({
+      date: entry.date,
+      accountNumber: entry.accountNumber,
+      receiptNumber: entry.receiptNumber || '',
+      details: entry.details,
+      amount: entry.amount.toString()
+    });
+  };
+
+  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    
+    // Auto-fill details when account number changes
+    if (name === 'accountNumber') {
+      const accountName = accounts[value];
+      setEditFormData(prev => ({
+        ...prev,
+        [name]: value,
+        details: accountName ? `${accountName}\n` : ''
+      }));
+    } else if (name === 'amount') {
+      // Handle amount formatting on blur
+      setEditFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    } else {
+      setEditFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
+  const handleEditAmountBlur = (value: string) => {
+    if (value && !isNaN(parseFloat(value))) {
+      const formattedAmount = formatAmountInput(value);
+      setEditFormData(prev => ({ ...prev, amount: formattedAmount }));
+    }
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!isOnline) {
       alert('इंटरनेट कनेक्शन नाही! कृपया ऑनलाइन येऊन पुन्हा प्रयत्न करा.');
       return;
     }
     
-    if (confirm('या नोंदीला हटवायचे आहे का?')) {
+    if (editingEntry && editFormData.date && editFormData.accountNumber && editFormData.details && editFormData.amount) {
       try {
-        await entriesFirebase.delete(entryId);
+        await entriesFirebase.update(editingEntry.id!, {
+          date: editFormData.date,
+          accountNumber: editFormData.accountNumber,
+          receiptNumber: editFormData.receiptNumber || '',
+          details: editFormData.details,
+          amount: parseFloat(editFormData.amount)
+        });
+        
+        setEditingEntry(null);
+        setEditFormData({
+          date: '',
+          accountNumber: '',
+          receiptNumber: '',
+          details: '',
+          amount: ''
+        });
+        
         loadData(); // Reload entries
       } catch (err) {
-        alert('नोंद हटवताना त्रुटी: ' + handleFirebaseError(err));
+        alert('नोंद संपादित करताना त्रुटी: ' + handleFirebaseError(err));
       }
     }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingEntry(null);
+    setEditFormData({
+      date: '',
+      accountNumber: '',
+      receiptNumber: '',
+      details: '',
+      amount: ''
+    });
   };
 
   const handlePrint = () => {
@@ -854,6 +933,156 @@ const EntryPage: React.FC = () => {
           </div>
         )}
 
+        {/* Edit Entry Form */}
+        {editingEntry && (
+          <div className="bg-white rounded-lg page-shadow ledger-border p-4 mb-6 print:hidden">
+            <div className="text-center mb-4">
+              <h2 className="text-xl font-bold text-blue-800 marathi-font">
+                नोंद संपादित करा - {editingEntry.type}
+              </h2>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className={`p-4 rounded-lg border-2 ${
+              editingEntry.type === 'जमा' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+            }`}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className={`block text-xs font-medium mb-1 marathi-font ${
+                    editingEntry.type === 'जमा' ? 'text-green-800' : 'text-red-800'
+                  }`}>
+                    तारीख *
+                  </label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={editFormData.date}
+                    onChange={handleEditInputChange}
+                    required
+                    disabled={!isOnline}
+                    className={`w-full p-2 text-sm border rounded focus:ring-1 focus:border-500 ${
+                      editingEntry.type === 'जमा' 
+                        ? 'border-green-300 focus:ring-green-500 focus:border-green-500' 
+                        : 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                    } ${!isOnline ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  />
+                </div>
+                <div>
+                  <label className={`block text-xs font-medium mb-1 marathi-font ${
+                    editingEntry.type === 'जमा' ? 'text-green-800' : 'text-red-800'
+                  }`}>
+                    खाते नंबर *
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      name="accountNumber"
+                      value={editFormData.accountNumber}
+                      onChange={handleEditInputChange}
+                      required
+                      disabled={!isOnline}
+                      placeholder="खाते नंबर"
+                      className={`flex-1 p-2 text-sm border rounded focus:ring-1 marathi-font ${
+                        editingEntry.type === 'जमा' 
+                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500' 
+                          : 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                      } ${!isOnline ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className={`block text-xs font-medium mb-1 marathi-font ${
+                    editingEntry.type === 'जमा' ? 'text-green-800' : 'text-red-800'
+                  }`}>
+                    पावती नंबर
+                  </label>
+                  <input
+                    type="text"
+                    name="receiptNumber"
+                    value={editFormData.receiptNumber}
+                    onChange={handleEditInputChange}
+                    disabled={!isOnline}
+                    placeholder="पावती नंबर"
+                    className={`w-full p-2 text-sm border rounded focus:ring-1 focus:border-500 marathi-font ${
+                      editingEntry.type === 'जमा' 
+                        ? 'border-green-300 focus:ring-green-500 focus:border-green-500' 
+                        : 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                    } ${!isOnline ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  />
+                </div>
+                <div>
+                  <label className={`block text-xs font-medium mb-1 marathi-font ${
+                    editingEntry.type === 'जमा' ? 'text-green-800' : 'text-red-800'
+                  }`}>
+                    रक्कम *
+                  </label>
+                  <input
+                    type="number"
+                    name="amount"
+                    value={editFormData.amount}
+                    onChange={handleEditInputChange}
+                    onBlur={(e) => handleEditAmountBlur(e.target.value)}
+                    required
+                    disabled={!isOnline}
+                    placeholder="0.00"
+                    step="0.01"
+                    min="0"
+                    className={`w-full p-2 text-sm border rounded focus:ring-1 focus:border-500 english-font ${
+                      editingEntry.type === 'जमा' 
+                        ? 'border-green-300 focus:ring-green-500 focus:border-green-500' 
+                        : 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                    } ${!isOnline ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  />
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <label className={`block text-xs font-medium mb-1 marathi-font ${
+                  editingEntry.type === 'जमा' ? 'text-green-800' : 'text-red-800'
+                }`}>
+                  तपशील *
+                </label>
+                <textarea
+                  name="details"
+                  value={editFormData.details}
+                  onChange={handleEditInputChange}
+                  required
+                  disabled={!isOnline}
+                  placeholder="तपशील लिहा..."
+                  rows={4}
+                  className={`w-full p-2 text-sm border rounded focus:ring-1 focus:border-500 marathi-font resize-vertical ${
+                    editingEntry.type === 'जमा' 
+                      ? 'border-green-300 focus:ring-green-500 focus:border-green-500' 
+                      : 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                  } ${!isOnline ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                />
+              </div>
+              
+              <div className="flex flex-wrap gap-3 justify-center">
+                <button
+                  type="submit"
+                  disabled={!isOnline}
+                  className={`px-6 py-2 rounded font-medium english-font transition-colors flex items-center gap-2 text-sm ${
+                    isOnline 
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                      : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                  }`}
+                >
+                  <Save className="w-4 h-4" />
+                  Save Changes
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded font-medium english-font transition-colors flex items-center gap-2 text-sm"
+                >
+                  <X className="w-4 h-4" />
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
         {/* Action Buttons */}
         {entries.length > 0 && isAdmin && (
           <div className="text-center mb-4 print:hidden">
@@ -930,16 +1159,16 @@ const EntryPage: React.FC = () => {
                             {jamaEntry ? jamaEntry.details : ''}
                             {jamaEntry && jamaEntry.id && isAdmin && (
                               <button
-                                onClick={() => handleDeleteEntry(jamaEntry.id!)}
+                                onClick={() => handleEditEntry(jamaEntry)}
                                 disabled={!isOnline}
-                                className={`delete-btn ml-2 p-1 rounded text-xs print:hidden ${
+                                className={`edit-btn ml-2 p-1 rounded text-xs print:hidden ${
                                   isOnline 
-                                    ? 'bg-red-500 hover:bg-red-600 text-white' 
+                                    ? 'bg-blue-500 hover:bg-blue-600 text-white' 
                                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 }`}
-                                title="Delete Entry"
+                                title="Edit Entry"
                               >
-                                <Trash2 className="w-3 h-3" />
+                                <Edit3 className="w-3 h-3" />
                               </button>
                             )}
                           </td>
@@ -961,16 +1190,16 @@ const EntryPage: React.FC = () => {
                             {naveEntry ? naveEntry.details : ''}
                             {naveEntry && naveEntry.id && isAdmin && (
                               <button
-                                onClick={() => handleDeleteEntry(naveEntry.id!)}
+                                onClick={() => handleEditEntry(naveEntry)}
                                 disabled={!isOnline}
-                                className={`delete-btn ml-2 p-1 rounded text-xs print:hidden ${
+                                className={`edit-btn ml-2 p-1 rounded text-xs print:hidden ${
                                   isOnline 
-                                    ? 'bg-red-500 hover:bg-red-600 text-white' 
+                                    ? 'bg-blue-500 hover:bg-blue-600 text-white' 
                                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 }`}
-                                title="Delete Entry"
+                                title="Edit Entry"
                               >
-                                <Trash2 className="w-3 h-3" />
+                                <Edit3 className="w-3 h-3" />
                               </button>
                             )}
                           </td>
