@@ -368,7 +368,7 @@ const EntryPage: React.FC = () => {
       return;
     }
     
-    if (confirm('क्या आपण या नोंदी काढून टाकाल? या क्रिया आता पुन्हा पुन्हा करण्यास अवघड असेल.')) {
+    if (confirm('आपण हि नोंद काढू इच्छिता?.')) {
       try {
         await entriesFirebase.delete(entryId);
         loadData(); // Reload entries
@@ -495,16 +495,15 @@ const EntryPage: React.FC = () => {
     XLSX.writeFile(wb, `किर्दवही_नोंदी_${new Date().toLocaleDateString('en-IN').replace(/\//g, '-')}.xlsx`);
   };
 
-  // Sort entries by account number first, then by date
+  // Sort entries by date first, then by account number
   const sortedEntries = [...entries].sort((a, b) => {
-    // First sort by account number (numerically)
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    if (dateA !== dateB) return dateA - dateB;
+    // If dates are the same, sort by account number (numerically)
     const accountA = parseInt(a.accountNumber) || 0;
     const accountB = parseInt(b.accountNumber) || 0;
-    if (accountA !== accountB) {
-      return accountA - accountB;
-    }
-    // If account numbers are the same, sort by date
-    return new Date(a.date).getTime() - new Date(b.date).getTime();
+    return accountA - accountB;
   });
 
   // Group entries by date and create daily totals

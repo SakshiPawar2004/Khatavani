@@ -93,17 +93,8 @@ const LedgerPage: React.FC = () => {
   const naveTotal = naveEntries.reduce((sum, entry) => sum + entry.amount, 0);
   const balance = jamaTotal - naveTotal;
 
-  // Sort entries by account number first, then by date
-  const sortedEntries = [...accountEntries].sort((a, b) => {
-    // First sort by account number (numerically)
-    const accountA = parseInt(a.accountNumber) || 0;
-    const accountB = parseInt(b.accountNumber) || 0;
-    if (accountA !== accountB) {
-      return accountA - accountB;
-    }
-    // If account numbers are the same, sort by date
-    return new Date(a.date).getTime() - new Date(b.date).getTime();
-  });
+  // Sort entries by date only
+  const sortedEntries = [...accountEntries].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const accountName = accounts[id || ''] || `खाते नंबर ${id}`;
 
