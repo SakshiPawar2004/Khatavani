@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { ArrowLeft, Save, X, BookOpen, Printer, Edit3, Plus, Download, Wifi, WifiOff, LogOut } from 'lucide-react';
+import { ArrowLeft, Save, X, BookOpen, Printer, Edit3, Trash2, Plus, Download, Wifi, WifiOff, LogOut } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { accountsFirebase, entriesFirebase, Account, Entry, handleFirebaseError } from '../services/firebaseService';
 
@@ -362,6 +362,22 @@ const EntryPage: React.FC = () => {
     });
   };
 
+  const handleDeleteEntry = async (entryId: string) => {
+    if (!isOnline) {
+      alert('इंटरनेट कनेक्शन नाही! कृपया ऑनलाइन येऊन पुन्हा प्रयत्न करा.');
+      return;
+    }
+    
+    if (confirm('क्या आपण या नोंदी काढून टाकाल? या क्रिया आता पुन्हा पुन्हा करण्यास अवघड असेल.')) {
+      try {
+        await entriesFirebase.delete(entryId);
+        loadData(); // Reload entries
+      } catch (err) {
+        alert('नोंद हटवताना त्रुटी: ' + handleFirebaseError(err));
+      }
+    }
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -372,8 +388,17 @@ const EntryPage: React.FC = () => {
       return;
     }
 
-    // Sort entries by date
-    const sortedEntries = [...entries].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // Sort entries by account number first, then by date
+    const sortedEntries = [...entries].sort((a, b) => {
+      // First sort by account number (numerically)
+      const accountA = parseInt(a.accountNumber) || 0;
+      const accountB = parseInt(b.accountNumber) || 0;
+      if (accountA !== accountB) {
+        return accountA - accountB;
+      }
+      // If account numbers are the same, sort by date
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
     
     // Group entries by date
     const entriesByDate = sortedEntries.reduce((acc, entry) => {
@@ -470,8 +495,17 @@ const EntryPage: React.FC = () => {
     XLSX.writeFile(wb, `किर्दवही_नोंदी_${new Date().toLocaleDateString('en-IN').replace(/\//g, '-')}.xlsx`);
   };
 
-  // Sort entries by date
-  const sortedEntries = [...entries].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  // Sort entries by account number first, then by date
+  const sortedEntries = [...entries].sort((a, b) => {
+    // First sort by account number (numerically)
+    const accountA = parseInt(a.accountNumber) || 0;
+    const accountB = parseInt(b.accountNumber) || 0;
+    if (accountA !== accountB) {
+      return accountA - accountB;
+    }
+    // If account numbers are the same, sort by date
+    return new Date(a.date).getTime() - new Date(b.date).getTime();
+  });
 
   // Group entries by date and create daily totals
   const entriesByDate = sortedEntries.reduce((acc, entry) => {
@@ -493,6 +527,22 @@ const EntryPage: React.FC = () => {
   // Format amount to show .00
   const formatAmount = (amount: number) => {
     return amount.toFixed(2);
+  };
+
+  // Delete all entries
+  const handleDeleteAllEntries = async () => {
+    if (!isOnline) {
+      alert('इंटरनेट कनेक्शन नाही! कृपया ऑनलाइन येऊन पुन्हा प्रयत्न करा.');
+      return;
+    }
+    if (!window.confirm('सर्व नोंदी कायमच्या काढून टाकायच्या आहेत का? ही क्रिया उलटवता येणार नाही!')) return;
+    try {
+      // Delete all entries in parallel
+      await Promise.all(entries.map(entry => entriesFirebase.delete(entry.id!)));
+      loadData();
+    } catch (err) {
+      alert('सर्व नोंदी हटवताना त्रुटी: ' + handleFirebaseError(err));
+    }
   };
 
 
@@ -1111,22 +1161,36 @@ const EntryPage: React.FC = () => {
             <h3 className="text-lg font-bold text-amber-800 marathi-font mb-4 text-center print:text-base print:mb-2">
               किर्दवही नोंदी
             </h3>
+            {isAdmin && (
+              <div className="flex justify-end mb-2 print:hidden">
+                <button
+                  onClick={handleDeleteAllEntries}
+                  disabled={!isOnline || entries.length === 0}
+                  className={`delete-btn px-4 py-2 rounded text-sm font-semibold bg-red-600 hover:bg-red-700 text-white transition-colors ${
+                    (!isOnline || entries.length === 0) ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  <Trash2 className="inline-block w-4 h-4 mr-1" />
+                  सर्व नोंदी हटवा
+                </button>
+              </div>
+            )}
             
             <div className="overflow-x-auto">
               <table className="w-full text-sm print:text-base table-fixed border border-black">
                 <thead>
                   {/* Sub Headers */}
                   <tr className="bg-amber-500 text-white print:bg-gray-50 print:text-black">
-                    <th className="p-1 text-left marathi-font border border-black date-column">तारीख</th>
-                    <th className="p-1 text-left marathi-font border border-black account-column">खाते नं.</th>
-                    <th className="p-1 text-left marathi-font border border-black receipt-column">पावती नं.</th>
-                    <th className="p-1 text-left marathi-font border border-black details-column">तपशील</th>
-                    <th className="p-1 text-right marathi-font border border-black amount-column">रक्कम</th>
-                    <th className="p-1 text-left marathi-font border border-black date-column">तारीख</th>
-                    <th className="p-1 text-left marathi-font border border-black account-column">खाते नं.</th>
-                    <th className="p-1 text-left marathi-font border border-black receipt-column">पावती नं.</th>
-                    <th className="p-1 text-left marathi-font border border-black details-column">तपशील</th>
-                    <th className="p-1 text-right marathi-font border border-black amount-column">रक्कम</th>
+                    <th className="p-1 text-left marathi-font border border-black date-column text-center align-middle">तारीख</th>
+                    <th className="p-1 text-left marathi-font border border-black account-column text-center align-middle">खाते नं.</th>
+                    <th className="p-1 text-left marathi-font border border-black receipt-column text-center align-middle">पावती नं.</th>
+                    <th className="p-1 text-left marathi-font border border-black details-column text-center align-middle">तपशील</th>
+                    <th className="p-1 text-right marathi-font border border-black amount-column text-center align-middle">रक्कम</th>
+                    <th className="p-1 text-left marathi-font border border-black date-column text-center align-middle">तारीख</th>
+                    <th className="p-1 text-left marathi-font border border-black account-column text-center align-middle">खाते नं.</th>
+                    <th className="p-1 text-left marathi-font border border-black receipt-column text-center align-middle">पावती नं.</th>
+                    <th className="p-1 text-left marathi-font border border-black details-column text-center align-middle">तपशील</th>
+                    <th className="p-1 text-right marathi-font border border-black amount-column text-center align-middle">रक्कम</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1146,30 +1210,44 @@ const EntryPage: React.FC = () => {
                       rows.push(
                         <tr key={`${date}-${i}`} className="hover:bg-amber-50 transition-colors border-b print:hover:bg-transparent print:bg-white">
                           {/* जमा side columns */}
-                          <td className="p-1 english-font border border-black date-column">
+                          <td className="p-1 english-font border border-black date-column text-center align-middle">
                             {jamaEntry ? new Date(jamaEntry.date).toLocaleDateString('en-IN') : ''}
                           </td>
-                          <td className="p-1 marathi-font font-medium border border-black account-column">
+                          <td className="p-1 marathi-font font-medium border border-black account-column text-center align-middle">
                             {jamaEntry ? jamaEntry.accountNumber : ''}
                           </td>
-                          <td className="p-1 marathi-font border border-black receipt-column">
+                          <td className="p-1 marathi-font border border-black receipt-column text-center align-middle">
                             {jamaEntry ? (jamaEntry.receiptNumber || '-') : ''}
                           </td>
                           <td className="p-1 marathi-font leading-relaxed border border-black details-column text-wrap">
                             {jamaEntry ? jamaEntry.details : ''}
                             {jamaEntry && jamaEntry.id && isAdmin && (
-                              <button
-                                onClick={() => handleEditEntry(jamaEntry)}
-                                disabled={!isOnline}
-                                className={`edit-btn ml-2 p-1 rounded text-xs print:hidden ${
-                                  isOnline 
-                                    ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                }`}
-                                title="Edit Entry"
-                              >
-                                <Edit3 className="w-3 h-3" />
-                              </button>
+                              <>
+                                <button
+                                  onClick={() => handleEditEntry(jamaEntry)}
+                                  disabled={!isOnline}
+                                  className={`edit-btn ml-2 p-1 rounded text-xs print:hidden ${
+                                    isOnline 
+                                      ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  }`}
+                                  title="Edit Entry"
+                                >
+                                  <Edit3 className="w-3 h-3" />
+                                </button>
+                                                                 <button
+                                   onClick={() => handleDeleteEntry(jamaEntry.id!)}
+                                  disabled={!isOnline}
+                                  className={`delete-btn ml-2 p-1 rounded text-xs print:hidden ${
+                                    isOnline 
+                                      ? 'bg-red-500 hover:bg-red-600 text-white' 
+                                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  }`}
+                                  title="Delete Entry"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </>
                             )}
                           </td>
                           <td className="p-1 text-right font-medium english-font border border-black amount-column">
@@ -1177,30 +1255,44 @@ const EntryPage: React.FC = () => {
                           </td>
                           
                           {/* नावे side columns */}
-                          <td className="p-1 english-font border border-black date-column">
+                          <td className="p-1 english-font border border-black date-column text-center align-middle">
                             {naveEntry ? new Date(naveEntry.date).toLocaleDateString('en-IN') : ''}
                           </td>
-                          <td className="p-1 marathi-font font-medium border border-black account-column">
+                          <td className="p-1 marathi-font font-medium border border-black account-column text-center align-middle">
                             {naveEntry ? naveEntry.accountNumber : ''}
                           </td>
-                          <td className="p-1 marathi-font border border-black receipt-column">
+                          <td className="p-1 marathi-font border border-black receipt-column text-center align-middle">
                             {naveEntry ? (naveEntry.receiptNumber || '-') : ''}
                           </td>
                           <td className="p-1 marathi-font leading-relaxed border border-black details-column text-wrap">
                             {naveEntry ? naveEntry.details : ''}
                             {naveEntry && naveEntry.id && isAdmin && (
-                              <button
-                                onClick={() => handleEditEntry(naveEntry)}
-                                disabled={!isOnline}
-                                className={`edit-btn ml-2 p-1 rounded text-xs print:hidden ${
-                                  isOnline 
-                                    ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                }`}
-                                title="Edit Entry"
-                              >
-                                <Edit3 className="w-3 h-3" />
-                              </button>
+                              <>
+                                <button
+                                  onClick={() => handleEditEntry(naveEntry)}
+                                  disabled={!isOnline}
+                                  className={`edit-btn ml-2 p-1 rounded text-xs print:hidden ${
+                                    isOnline 
+                                      ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  }`}
+                                  title="Edit Entry"
+                                >
+                                  <Edit3 className="w-3 h-3" />
+                                </button>
+                                                                 <button
+                                   onClick={() => handleDeleteEntry(naveEntry.id!)}
+                                  disabled={!isOnline}
+                                  className={`delete-btn ml-2 p-1 rounded text-xs print:hidden ${
+                                    isOnline 
+                                      ? 'bg-red-500 hover:bg-red-600 text-white' 
+                                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  }`}
+                                  title="Delete Entry"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </>
                             )}
                           </td>
                           <td className="p-1 text-right font-medium english-font border border-black amount-column">

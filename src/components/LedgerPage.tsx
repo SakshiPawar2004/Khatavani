@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { ArrowLeft, FileText, Printer, Edit3, Download, Wifi, WifiOff, LogOut, Save, X } from 'lucide-react';
+import { ArrowLeft, FileText, Printer, Edit3, Trash2, Download, Wifi, WifiOff, LogOut, Save, X } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { accountsFirebase, entriesFirebase, Account, Entry, handleFirebaseError } from '../services/firebaseService';
 
@@ -93,8 +93,17 @@ const LedgerPage: React.FC = () => {
   const naveTotal = naveEntries.reduce((sum, entry) => sum + entry.amount, 0);
   const balance = jamaTotal - naveTotal;
 
-  // Sort entries by date
-  const sortedEntries = [...accountEntries].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  // Sort entries by account number first, then by date
+  const sortedEntries = [...accountEntries].sort((a, b) => {
+    // First sort by account number (numerically)
+    const accountA = parseInt(a.accountNumber) || 0;
+    const accountB = parseInt(b.accountNumber) || 0;
+    if (accountA !== accountB) {
+      return accountA - accountB;
+    }
+    // If account numbers are the same, sort by date
+    return new Date(a.date).getTime() - new Date(b.date).getTime();
+  });
 
   const accountName = accounts[id || ''] || `खाते नंबर ${id}`;
 
@@ -187,6 +196,22 @@ const LedgerPage: React.FC = () => {
       details: '',
       amount: ''
     });
+  };
+
+  const handleDeleteEntry = async (entryId: string) => {
+    if (!isOnline) {
+      alert('इंटरनेट कनेक्शन नाही! कृपया ऑनलाइन येऊन पुन्हा प्रयत्न करा.');
+      return;
+    }
+    
+    if (confirm('क्या आपण या नोंदी काढून टाकाल? या क्रिया आता पुन्हा पुन्हा करण्यास अवघड असेल.')) {
+      try {
+        await entriesFirebase.delete(entryId);
+        loadData(); // Reload entries
+      } catch (err) {
+        alert('नोंद हटवताना त्रुटी: ' + handleFirebaseError(err));
+      }
+    }
   };
 
   const handleExportToExcel = () => {
@@ -515,16 +540,16 @@ const LedgerPage: React.FC = () => {
                           {entry.details}
                           {entry.id && isAdmin && (
                             <button
-                              onClick={() => handleEditEntry(entry)}
+                              onClick={() => handleDeleteEntry(entry.id!)}
                               disabled={!isOnline}
-                              className={`edit-btn ml-2 p-1 rounded text-xs print:hidden ${
+                              className={`delete-btn ml-2 p-1 rounded text-xs print:hidden ${
                                 isOnline 
-                                  ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                                  ? 'bg-red-500 hover:bg-red-600 text-white' 
                                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                               }`}
-                              title="Edit Entry"
+                              title="Delete Entry"
                             >
-                              <Edit3 className="w-3 h-3" />
+                              <Trash2 className="w-3 h-3" />
                             </button>
                           )}
                         </td>
