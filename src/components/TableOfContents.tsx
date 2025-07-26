@@ -102,7 +102,7 @@ const TableOfContents: React.FC = () => {
         loadAccounts(); // Reload accounts
         
         // Trigger a page refresh to update account names in other components
-        window.dispatchEvent(new Event('accountNameUpdated'));
+        window.dispatchEvent(new Event('accountUpdated'));
       } catch (err) {
         alert('खाते अपडेट करताना त्रुटी: ' + handleFirebaseError(err));
       }
@@ -317,25 +317,37 @@ const TableOfContents: React.FC = () => {
         {/* Main Header Section */}
         <div className="main-header-section print:hidden">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between">
-              <div></div>
-              <div className="flex items-center gap-3">
-                <BookOpen className="w-8 h-8" />
-                <h1 className="text-3xl md:text-4xl font-bold marathi-font">किर्दवही</h1>
-              </div>
-              {isAdmin && (
-                <button
-                  onClick={() => {
-                    logout();
-                    window.location.href = '/admin/login';
-                  }}
-                  className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs font-medium transition-colors flex items-center gap-1"
-                >
-                  <LogOut className="w-3 h-3" />
-                  Logout
-                </button>
-              )}
-            </div>
+<div
+  className={`flex items-center ${
+    isAdmin ? 'justify-between' : 'justify-center'
+  }`}
+>
+  {isAdmin ? (
+    <>
+      <div></div>
+      <div className="flex items-center gap-3">
+        <BookOpen className="w-8 h-8" />
+        <h1 className="text-3xl md:text-4xl font-bold marathi-font">किर्दवही</h1>
+      </div>
+      <button
+        onClick={() => {
+          logout();
+          window.location.href = '/admin/login';
+        }}
+        className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs font-medium transition-colors flex items-center gap-1"
+      >
+        <LogOut className="w-3 h-3" />
+        Logout
+      </button>
+    </>
+  ) : (
+    <div className="flex items-center gap-3">
+      <BookOpen className="w-8 h-8" />
+      <h1 className="text-3xl md:text-4xl font-bold marathi-font">किर्दवही</h1>
+    </div>
+  )}
+</div>
+
             <p className="text-center text-white mt-2 english-font">Marathi Ledger Book</p>
           </div>
         </div>
