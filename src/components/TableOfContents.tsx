@@ -5,6 +5,18 @@ import { BookOpen, Plus, Edit3, Edit, Trash2, Save, X, Download, Wifi, WifiOff, 
 import * as XLSX from 'xlsx';
 import { accountsFirebase, entriesFirebase, Account, Entry, handleFirebaseError } from '../services/firebaseService';
 
+const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const stripAccountName = (details: string, accounts: { [key: string]: string }) => {
+  if (!details) return '';
+  for (const name of Object.values(accounts)) {
+    const safeName = escapeRegExp(name);
+    const regex = new RegExp(`(^|[\n\r])\s*${safeName}\s*[:：]*\s*`, 'g');
+    details = details.replace(regex, '$1');
+  }
+  return details.trim();
+};
+
 const TableOfContents: React.FC = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,7 +114,7 @@ const TableOfContents: React.FC = () => {
         loadAccounts(); // Reload accounts
         
         // Trigger a page refresh to update account names in other components
-        window.dispatchEvent(new Event('accountUpdated'));
+        window.dispatchEvent(new Event('accountNameUpdated'));
       } catch (err) {
         alert('खाते अपडेट करताना त्रुटी: ' + handleFirebaseError(err));
       }
@@ -179,6 +191,9 @@ const TableOfContents: React.FC = () => {
         return numA - numB;
       });
 
+      const accountNameMap: { [key: string]: string } = {};
+      accounts.forEach(acc => { accountNameMap[acc.khateNumber] = acc.name; });
+
       sortedAccounts.forEach((account, accountIndex) => {
         // Filter entries for this account
         const accountEntries = allEntries.filter(entry => entry.accountNumber === account.khateNumber);
@@ -203,7 +218,7 @@ const TableOfContents: React.FC = () => {
               'खाते नं. व नाव': '',
               'तारीख': new Date(entry.date).toLocaleDateString('en-IN'),
               'पावती नं.': entry.receiptNumber || '-',
-              'तपशील': entry.details,
+              'तपशील': stripAccountName(entry.details, accountNameMap),
               'जमा रक्कम': entry.type === 'जमा' ? entry.amount.toFixed(2) : '-',
               'नावे रक्कम': entry.type === 'नावे' ? entry.amount.toFixed(2) : '-'
             });
@@ -317,38 +332,27 @@ const TableOfContents: React.FC = () => {
         {/* Main Header Section */}
         <div className="main-header-section print:hidden">
           <div className="container mx-auto px-4">
-<div
-  className={`flex items-center ${
-    isAdmin ? 'justify-between' : 'justify-center'
-  }`}
->
-  {isAdmin ? (
-    <>
-      <div></div>
-      <div className="flex items-center gap-3">
-        <BookOpen className="w-8 h-8" />
-        <h1 className="text-3xl md:text-4xl font-bold marathi-font">किर्दवही</h1>
-      </div>
-      <button
-        onClick={() => {
-          logout();
-          window.location.href = '/admin/login';
-        }}
-        className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs font-medium transition-colors flex items-center gap-1"
-      >
-        <LogOut className="w-3 h-3" />
-        Logout
-      </button>
-    </>
-  ) : (
-    <div className="flex items-center gap-3">
-      <BookOpen className="w-8 h-8" />
-      <h1 className="text-3xl md:text-4xl font-bold marathi-font">किर्दवही</h1>
-    </div>
-  )}
-</div>
-
-            <p className="text-center text-white mt-2 english-font">Marathi Ledger Book</p>
+            <div className="flex flex-col items-center justify-center">
+              <div className="flex items-center gap-3 mt-4 mb-2">
+                <BookOpen className="w-8 h-8" />
+                <h1 className="text-3xl md:text-4xl font-bold marathi-font">किर्दवही</h1>
+              </div>
+              <p className="text-center text-white english-font">Marathi Ledger Book</p>
+            </div>
+            {isAdmin && (
+              <div className="absolute top-4 right-4">
+                <button
+                  onClick={() => {
+                    logout();
+                    window.location.href = '/admin/login';
+                  }}
+                  className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs font-medium transition-colors flex items-center gap-1"
+                >
+                  <LogOut className="w-3 h-3" />
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
