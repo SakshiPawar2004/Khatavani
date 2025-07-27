@@ -5,6 +5,33 @@ import { ArrowLeft, FileText, Printer, Edit3, Trash2, Download, Wifi, WifiOff, L
 import * as XLSX from 'xlsx';
 import { accountsFirebase, entriesFirebase, Account, Entry, handleFirebaseError } from '../services/firebaseService';
 
+// Helper to highlight account name at start of details
+const highlightAccountName = (details: string, accounts: { [key: string]: string }) => {
+  if (!details) return details;
+  // Find if details starts with any account name
+  const found = Object.values(accounts).find(name => details.startsWith(name));
+  if (found) {
+    // Remove any colons or spaces after the account name
+    let rest = details.slice(found.length).replace(/^[:\s]+/, '');
+    // Add a single colon
+    return <span><span style={{color:'#dc2626', fontWeight:'bold'}}>{found}:</span>{rest ? ' ' + rest : ''}</span>;
+  }
+  return details;
+};
+
+// Helper to remove account name from details in LedgerPage
+const stripAccountName = (details: string, accounts: { [key: string]: string }) => {
+  if (!details) return details;
+  // Find if details starts with any account name
+  const found = Object.values(accounts).find(name => details.startsWith(name));
+  if (found) {
+    // Remove the account name and any colons/spaces after it
+    let rest = details.slice(found.length).replace(/^[:\s]+/, '');
+    return rest;
+  }
+  return details;
+};
+
 const LedgerPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -215,7 +242,7 @@ const LedgerPage: React.FC = () => {
     const excelData = sortedEntries.map((entry: Entry) => ({
       'तारीख': new Date(entry.date).toLocaleDateString('en-IN'),
       'पावती नं.': entry.receiptNumber || '-',
-      'तपशील': entry.details,
+      'तपशील': stripAccountName(entry.details, accounts),
       'जमा रक्कम': entry.type === 'जमा' ? entry.amount.toFixed(2) : '-',
       'नावे रक्कम': entry.type === 'नावे' ? entry.amount.toFixed(2) : '-'
     }));
@@ -510,25 +537,25 @@ const LedgerPage: React.FC = () => {
               <table className="w-full text-sm print:text-base border border-black">
                 <thead>
                   <tr className="bg-amber-600 text-white print:bg-gray-100 print:text-black">
-                    <th className="p-2 text-left marathi-font border border-black">तारीख</th>
-                    <th className="p-2 text-left marathi-font border border-black">खाते नं.</th>
-                    <th className="p-2 text-left marathi-font border border-black">तपशील</th>
-                    <th className="p-2 text-right marathi-font border border-black">जमा रक्कम</th>
-                    <th className="p-2 text-right marathi-font border border-black">नावे रक्कम</th>
+                    <th className="p-2 text-center marathi-font border border-black align-middle">तारीख</th>
+                    <th className="p-2 text-center marathi-font border border-black align-middle">खाते नं.</th>
+                    <th className="p-2 text-center marathi-font border border-black align-middle">तपशील</th>
+                    <th className="p-2 text-center marathi-font border border-black align-middle">जमा रक्कम</th>
+                    <th className="p-2 text-center marathi-font border border-black align-middle">नावे रक्कम</th>
                   </tr>
                 </thead>
                 <tbody>
                   {sortedEntries.map((entry, index) => {
                     return (
                       <tr key={entry.id} className="hover:bg-amber-50 transition-colors border-b print:hover:bg-transparent print:bg-white">
-                        <td className="p-2 english-font border border-black">
+                        <td className="p-2 english-font border border-black text-center align-middle">
                           {new Date(entry.date).toLocaleDateString('en-IN')}
                         </td>
-                        <td className="p-2 marathi-font border border-black">
+                        <td className="p-2 marathi-font border border-black text-center align-middle">
                           {entry.accountNumber}
                         </td>
                         <td className="p-2 marathi-font leading-relaxed border border-black text-wrap">
-                          {entry.details}
+                          {stripAccountName(entry.details, accounts)}
                           {entry.id && isAdmin && (
                             <button
                               onClick={() => handleDeleteEntry(entry.id!)}
