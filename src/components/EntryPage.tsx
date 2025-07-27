@@ -5,6 +5,20 @@ import { ArrowLeft, Save, X, BookOpen, Printer, Edit3, Trash2, Plus, Download, W
 import * as XLSX from 'xlsx';
 import { accountsFirebase, entriesFirebase, Account, Entry, handleFirebaseError } from '../services/firebaseService';
 
+// Helper to highlight account name at start of details
+const highlightAccountName = (details: string, accounts: { [key: string]: string }) => {
+  if (!details) return details;
+  // Find if details starts with any account name
+  const found = Object.values(accounts).find(name => details.startsWith(name));
+  if (found) {
+    // Remove any colons or spaces after the account name
+    let rest = details.slice(found.length).replace(/^[:\s]+/, '');
+    // Add a single colon
+    return <span><span style={{color:'#dc2626', fontWeight:'bold'}}>{found}:</span>{rest ? ' ' + rest : ''}</span>;
+  }
+  return details;
+};
+
 const EntryPage: React.FC = () => {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [accounts, setAccounts] = useState<{ [key: string]: string }>({});
@@ -388,16 +402,15 @@ const EntryPage: React.FC = () => {
       return;
     }
 
-    // Sort entries by account number first, then by date
+    // Sort entries by date first, then by account number
     const sortedEntries = [...entries].sort((a, b) => {
-      // First sort by account number (numerically)
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      if (dateA !== dateB) return dateA - dateB;
+      // If dates are the same, sort by account number (numerically)
       const accountA = parseInt(a.accountNumber) || 0;
       const accountB = parseInt(b.accountNumber) || 0;
-      if (accountA !== accountB) {
-        return accountA - accountB;
-      }
-      // If account numbers are the same, sort by date
-      return new Date(a.date).getTime() - new Date(b.date).getTime();
+      return accountA - accountB;
     });
     
     // Group entries by date
@@ -427,12 +440,26 @@ const EntryPage: React.FC = () => {
           'तारीख': jamaEntry ? new Date(jamaEntry.date).toLocaleDateString('en-IN') : '',
           'खाते नं.': jamaEntry ? jamaEntry.accountNumber : '',
           'पावती नं.': jamaEntry ? (jamaEntry.receiptNumber || '-') : '',
-          'तपशील': jamaEntry ? jamaEntry.details : '',
+          'तपशील': jamaEntry ? (() => {
+            const found = Object.values(accounts).find(name => jamaEntry.details.startsWith(name));
+            if (found) {
+              let rest = jamaEntry.details.slice(found.length).replace(/^[:\s]+/, '');
+              return found + ':\n' + rest;
+            }
+            return jamaEntry.details;
+          })() : '',
           'रक्कम': jamaEntry ? jamaEntry.amount.toFixed(2) : '',
           'तारीख ': naveEntry ? new Date(naveEntry.date).toLocaleDateString('en-IN') : '',
           'खाते नं. ': naveEntry ? naveEntry.accountNumber : '',
           'पावती नं. ': naveEntry ? (naveEntry.receiptNumber || '-') : '',
-          'तपशील ': naveEntry ? naveEntry.details : '',
+          'तपशील ': naveEntry ? (() => {
+            const found = Object.values(accounts).find(name => naveEntry.details.startsWith(name));
+            if (found) {
+              let rest = naveEntry.details.slice(found.length).replace(/^[:\s]+/, '');
+              return found + ':\n' + rest;
+            }
+            return naveEntry.details;
+          })() : '',
           'रक्कम ': naveEntry ? naveEntry.amount.toFixed(2) : ''
         });
       }
@@ -490,6 +517,17 @@ const EntryPage: React.FC = () => {
 
     // Add worksheet to workbook
     XLSX.utils.book_append_sheet(wb, ws, 'किर्दवही नोंदी');
+
+    // Color details cells red if they start with an account name
+    const detailsCols = ['D', 'I'];
+    Object.keys(ws).forEach(cell => {
+      if (detailsCols.some(col => cell.startsWith(col))) {
+        const v = ws[cell].v;
+        if (typeof v === 'string' && Object.values(accounts).some(name => v.startsWith(name))) {
+          ws[cell].s = { font: { color: { rgb: 'FFDC2626' }, bold: true } };
+        }
+      }
+    });
 
     // Generate Excel file and download
     XLSX.writeFile(wb, `किर्दवही_नोंदी_${new Date().toLocaleDateString('en-IN').replace(/\//g, '-')}.xlsx`);
@@ -1219,7 +1257,7 @@ const EntryPage: React.FC = () => {
                             {jamaEntry ? (jamaEntry.receiptNumber || '-') : ''}
                           </td>
                           <td className="p-1 marathi-font leading-relaxed border border-black details-column text-wrap">
-                            {jamaEntry ? jamaEntry.details : ''}
+                            {jamaEntry ? highlightAccountName(jamaEntry.details, accounts) : ''}
                             {jamaEntry && jamaEntry.id && isAdmin && (
                               <>
                                 <button
@@ -1264,7 +1302,7 @@ const EntryPage: React.FC = () => {
                             {naveEntry ? (naveEntry.receiptNumber || '-') : ''}
                           </td>
                           <td className="p-1 marathi-font leading-relaxed border border-black details-column text-wrap">
-                            {naveEntry ? naveEntry.details : ''}
+                            {naveEntry ? highlightAccountName(naveEntry.details, accounts) : ''}
                             {naveEntry && naveEntry.id && isAdmin && (
                               <>
                                 <button

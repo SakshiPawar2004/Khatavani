@@ -510,8 +510,8 @@ const LedgerPage: React.FC = () => {
               <table className="w-full text-sm print:text-base border border-black">
                 <thead>
                   <tr className="bg-amber-600 text-white print:bg-gray-100 print:text-black">
-                    <th className="p-2 text-left marathi-font border border-black text-center align-middle">तारीख</th>
-                    <th className="p-2 text-left marathi-font border border-black text-center align-middle">खाते नं.</th>
+                    <th className="p-2 text-left marathi-font border border-black">तारीख</th>
+                    <th className="p-2 text-left marathi-font border border-black">खाते नं.</th>
                     <th className="p-2 text-left marathi-font border border-black">तपशील</th>
                     <th className="p-2 text-right marathi-font border border-black">जमा रक्कम</th>
                     <th className="p-2 text-right marathi-font border border-black">नावे रक्कम</th>
@@ -521,10 +521,10 @@ const LedgerPage: React.FC = () => {
                   {sortedEntries.map((entry, index) => {
                     return (
                       <tr key={entry.id} className="hover:bg-amber-50 transition-colors border-b print:hover:bg-transparent print:bg-white">
-                        <td className="p-2 english-font border border-black text-center align-middle">
+                        <td className="p-2 english-font border border-black">
                           {new Date(entry.date).toLocaleDateString('en-IN')}
                         </td>
-                        <td className="p-2 marathi-font border border-black text-center align-middle">
+                        <td className="p-2 marathi-font border border-black">
                           {entry.accountNumber}
                         </td>
                         <td className="p-2 marathi-font leading-relaxed border border-black text-wrap">
