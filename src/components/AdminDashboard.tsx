@@ -1,12 +1,55 @@
 import React from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Users, FileText, Plus, Settings, BarChart3 } from 'lucide-react';
 import TableOfContents from './TableOfContents';
+import { accountsFirebase, entriesFirebase, Account, Entry, handleFirebaseError } from '../services/firebaseService';
 
 const AdminDashboard: React.FC = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    totalAccounts: 0,
+    totalEntries: 0,
+    totalJama: 0,
+    totalNave: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  const loadStats = async () => {
+    try {
+      setLoading(true);
+      
+      // Load accounts
+      const accounts = await accountsFirebase.getAll();
+      
+      // Load all entries
+      const entries = await entriesFirebase.getAll();
+      
+      // Calculate totals
+      const jamaEntries = entries.filter(entry => entry.type === 'जमा');
+      const naveEntries = entries.filter(entry => entry.type === 'नावे');
+      
+      const totalJama = jamaEntries.reduce((sum, entry) => sum + entry.amount, 0);
+      const totalNave = naveEntries.reduce((sum, entry) => sum + entry.amount, 0);
+      
+      setStats({
+        totalAccounts: accounts.length,
+        totalEntries: entries.length,
+        totalJama,
+        totalNave
+      });
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -50,7 +93,9 @@ const AdminDashboard: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-800">Total Accounts</h3>
-                <p className="text-2xl font-bold text-blue-600">--</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {loading ? '--' : stats.totalAccounts}
+                </p>
               </div>
             </div>
           </div>
@@ -62,7 +107,9 @@ const AdminDashboard: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-800">Total Entries</h3>
-                <p className="text-2xl font-bold text-green-600">--</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {loading ? '--' : stats.totalEntries}
+                </p>
               </div>
             </div>
           </div>
@@ -74,7 +121,9 @@ const AdminDashboard: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-800">Total जमा</h3>
-                <p className="text-2xl font-bold text-yellow-600">₹--</p>
+                <p className="text-2xl font-bold text-yellow-600">
+                  {loading ? '₹--' : `₹${stats.totalJama.toFixed(2)}`}
+                </p>
               </div>
             </div>
           </div>
@@ -86,7 +135,9 @@ const AdminDashboard: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-800">Total नावे</h3>
-                <p className="text-2xl font-bold text-red-600">₹--</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {loading ? '₹--' : `₹${stats.totalNave.toFixed(2)}`}
+                </p>
               </div>
             </div>
           </div>

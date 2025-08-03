@@ -26,6 +26,7 @@ const TableOfContents: React.FC = () => {
   const [newAccountNumber, setNewAccountNumber] = useState('');
   const [editingAccount, setEditingAccount] = useState<string | null>(null);
   const [editAccountName, setEditAccountName] = useState('');
+  const [editAccountNumber, setEditAccountNumber] = useState('');
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const { isAdmin, logout } = useAuth();
 
@@ -98,6 +99,7 @@ const TableOfContents: React.FC = () => {
     }
     setEditingAccount(account.id!);
     setEditAccountName(account.name);
+    setEditAccountNumber(account.khateNumber);
   };
 
   const handleSaveEdit = async () => {
@@ -106,11 +108,25 @@ const TableOfContents: React.FC = () => {
       return;
     }
     
-    if (editingAccount && editAccountName.trim()) {
+    if (editingAccount && editAccountName.trim() && editAccountNumber.trim()) {
+      // Check if the new account number already exists (only if it's different from current)
+      const currentAccount = accounts.find(acc => acc.id === editingAccount);
+      if (currentAccount && editAccountNumber !== currentAccount.khateNumber) {
+        const existingAccount = accounts.find(acc => acc.khateNumber === editAccountNumber.trim() && acc.id !== editingAccount);
+        if (existingAccount) {
+          alert('या खाते नंबरचे खाते आधीच अस्तित्वात आहे!');
+          return;
+        }
+      }
+      
       try {
-        await accountsFirebase.update(editingAccount, { name: editAccountName.trim() });
+        await accountsFirebase.update(editingAccount, { 
+          name: editAccountName.trim(),
+          khateNumber: editAccountNumber.trim()
+        });
         setEditingAccount(null);
         setEditAccountName('');
+        setEditAccountNumber('');
         loadAccounts(); // Reload accounts
         
         // Trigger a page refresh to update account names in other components
@@ -124,6 +140,7 @@ const TableOfContents: React.FC = () => {
   const handleCancelEdit = () => {
     setEditingAccount(null);
     setEditAccountName('');
+    setEditAccountNumber('');
   };
 
   const handleDeleteAccount = async (account: Account) => {
@@ -338,8 +355,8 @@ const TableOfContents: React.FC = () => {
                 <h1 className="text-3xl md:text-4xl font-bold marathi-font">किर्दवही</h1>
               </div>
               <p className="text-center text-white english-font">Marathi Ledger Book</p>
-            </div>
-            {isAdmin && (
+              </div>
+              {isAdmin && (
               <div className="absolute top-4 right-4">
                 <button
                   onClick={() => {
@@ -352,7 +369,7 @@ const TableOfContents: React.FC = () => {
                   Logout
                 </button>
               </div>
-            )}
+              )}
           </div>
         </div>
       </div>
@@ -522,12 +539,22 @@ const TableOfContents: React.FC = () => {
                         {editingAccount === account.id ? (
                           <div className="grid grid-cols-12 gap-2 p-3 text-sm print:hidden">
                             <div className="col-span-3 font-medium text-amber-700 english-font flex items-center">{account.khateNumber}</div>
-                            <div className="col-span-7">
+                            <div className="col-span-3">
+                              <input
+                                type="text"
+                                value={editAccountNumber}
+                                onChange={(e) => setEditAccountNumber(e.target.value)}
+                                className="w-full p-1 border border-amber-300 rounded text-xs english-font"
+                                placeholder="खाते नं."
+                              />
+                            </div>
+                            <div className="col-span-4">
                               <input
                                 type="text"
                                 value={editAccountName}
                                 onChange={(e) => setEditAccountName(e.target.value)}
                                 className="w-full p-1 border border-amber-300 rounded text-xs marathi-font"
+                                placeholder="खात्याचे नाव"
                               />
                             </div>
                             <div className="col-span-2 flex gap-1">
@@ -601,12 +628,22 @@ const TableOfContents: React.FC = () => {
                         {editingAccount === account.id ? (
                           <div className="grid grid-cols-12 gap-2 p-3 text-sm print:hidden">
                             <div className="col-span-3 font-medium text-amber-700 english-font flex items-center">{account.khateNumber}</div>
-                            <div className="col-span-7">
+                            <div className="col-span-3">
+                              <input
+                                type="text"
+                                value={editAccountNumber}
+                                onChange={(e) => setEditAccountNumber(e.target.value)}
+                                className="w-full p-1 border border-amber-300 rounded text-xs english-font"
+                                placeholder="खाते नं."
+                              />
+                            </div>
+                            <div className="col-span-4">
                               <input
                                 type="text"
                                 value={editAccountName}
                                 onChange={(e) => setEditAccountName(e.target.value)}
                                 className="w-full p-1 border border-amber-300 rounded text-xs marathi-font"
+                                placeholder="खात्याचे नाव"
                               />
                             </div>
                             <div className="col-span-2 flex gap-1">
