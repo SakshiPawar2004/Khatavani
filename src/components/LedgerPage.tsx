@@ -323,7 +323,7 @@ const LedgerPage: React.FC = () => {
                 className="flex items-center gap-2 bg-black bg-opacity-30 hover:bg-opacity-40 px-4 py-2 rounded-lg transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span className="english-font">Back to Contents</span>
+                <span className="english-font">खतावणी बघा</span>
               </Link>
               <div className="flex items-center gap-3">
                 <FileText className="w-6 h-6" />

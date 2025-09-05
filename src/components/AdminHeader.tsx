@@ -82,50 +82,45 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
             <div className="flex items-center gap-6">
               {/* Stats Cards - All in one line */}
               <div className="flex items-center gap-4">
-                <div className="bg-white bg-opacity-10 rounded-lg px-3 py-2 flex items-center gap-2">
-                  <Users className="w-4 h-4 text-blue-300" />
+                <div className="bg-white bg-opacity-10 rounded-lg px-3 py-2 text-center min-w-[80px]">
                   <div className="text-sm">
-                    <div className="text-gray-300">Total Accounts</div>
+                    <div className="text-gray-300">एकूण खाते</div>
                     <div className="text-lg font-bold text-blue-300">
                       {loading ? '--' : stats.totalAccounts}
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-white bg-opacity-10 rounded-lg px-3 py-2 flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-green-300" />
+                <div className="bg-white bg-opacity-10 rounded-lg px-3 py-2 text-center min-w-[80px]">
                   <div className="text-sm">
-                    <div className="text-gray-300">Total Entries</div>
+                    <div className="text-gray-300">एकूण व्यवहार</div>
                     <div className="text-lg font-bold text-green-300">
                       {loading ? '--' : stats.totalEntries}
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-white bg-opacity-10 rounded-lg px-3 py-2 flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-yellow-300" />
+                <div className="bg-white bg-opacity-10 rounded-lg px-3 py-2 text-center min-w-[80px]">
                   <div className="text-sm">
-                    <div className="text-gray-300">Total जमा</div>
+                    <div className="text-gray-300">जमा</div>
                     <div className="text-lg font-bold text-yellow-300">
                       {loading ? '--' : `${stats.totalJama.toFixed(2)}`}
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-white bg-opacity-10 rounded-lg px-3 py-2 flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-red-300" />
+                <div className="bg-white bg-opacity-10 rounded-lg px-3 py-2 text-center min-w-[80px]">
                   <div className="text-sm">
-                    <div className="text-gray-300">Total नावे</div>
+                    <div className="text-gray-300">नावे</div>
                     <div className="text-lg font-bold text-red-300">
                       {loading ? '--' : `${stats.totalNave.toFixed(2)}`}
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-white bg-opacity-10 rounded-lg px-3 py-2 flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-red-300" />
+                <div className="bg-white bg-opacity-10 rounded-lg px-3 py-2 text-center min-w-[80px]">
                   <div className="text-sm">
-                    <div className="text-gray-300">खात्यावर शिल्लक</div>
+                    <div className="text-gray-300">शिल्लक</div>
                     <div className="text-lg font-bold text-red-300">
                       {loading ? '--' : `${balance.toFixed(2)}`}
                     </div>
