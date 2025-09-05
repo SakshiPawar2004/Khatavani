@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { BookOpen, Plus, Edit3, Edit, Trash2, Save, X, Download, Wifi, WifiOff, FileText, LogOut } from 'lucide-react';
+import { BookOpen, Plus, Edit3, Edit, Trash2, Save, X, Download, Wifi, WifiOff, FileText } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { accountsFirebase, entriesFirebase, Account, Entry, handleFirebaseError } from '../services/firebaseService';
+import AdminHeader from './AdminHeader';
 
 const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -17,7 +18,11 @@ const stripAccountName = (details: string, accounts: { [key: string]: string }) 
   return details.trim();
 };
 
-const TableOfContents: React.FC = () => {
+interface TableOfContentsProps {
+  hideAdminHeader?: boolean;
+}
+
+const TableOfContents: React.FC<TableOfContentsProps> = ({ hideAdminHeader = false }) => {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -337,6 +342,9 @@ const TableOfContents: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100">
+      {/* Admin Header */}
+      {isAdmin && !hideAdminHeader && <AdminHeader title="किर्दवही" showStats={true} />}
+      
       {/* Combined Header with School Building Background */}
       <div className="combined-header shadow-lg print:shadow-none">
         {/* School Header Section */}
@@ -346,32 +354,20 @@ const TableOfContents: React.FC = () => {
           ता. बागलाण जि. नाशिक
         </div>
         
-        {/* Main Header Section */}
-        <div className="main-header-section print:hidden">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col items-center justify-center">
-              <div className="flex items-center gap-3 mt-4 mb-2">
-                <BookOpen className="w-8 h-8" />
-                <h1 className="text-3xl md:text-4xl font-bold marathi-font">किर्दवही</h1>
+        {/* Main Header Section - Only show for non-admin users */}
+        {!isAdmin && (
+          <div className="main-header-section print:hidden">
+            <div className="container mx-auto px-4">
+              <div className="flex flex-col items-center justify-center">
+                <div className="flex items-center gap-3 mt-4 mb-2">
+                  <BookOpen className="w-8 h-8" />
+                  <h1 className="text-3xl md:text-4xl font-bold marathi-font">किर्दवही</h1>
+                </div>
+                <p className="text-center text-white english-font">Marathi Ledger Book</p>
               </div>
-              <p className="text-center text-white english-font">Marathi Ledger Book</p>
-              </div>
-              {isAdmin && (
-              <div className="absolute top-4 right-4">
-                <button
-                  onClick={() => {
-                    logout();
-                    window.location.href = '/admin/login';
-                  }}
-                  className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs font-medium transition-colors flex items-center gap-1"
-                >
-                  <LogOut className="w-3 h-3" />
-                  Logout
-                </button>
-              </div>
-              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Offline Alert */}

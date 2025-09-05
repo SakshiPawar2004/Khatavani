@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { ArrowLeft, FileText, Printer, Edit3, Trash2, Download, Wifi, WifiOff, LogOut, Save, X } from 'lucide-react';
+import { ArrowLeft, FileText, Printer, Edit3, Trash2, Download, Wifi, WifiOff, Save, X } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { accountsFirebase, entriesFirebase, Account, Entry, handleFirebaseError } from '../services/firebaseService';
+import AdminHeader from './AdminHeader';
 
 // Helper to highlight account name at start of details
 const highlightAccountName = (details: string, accounts: { [key: string]: string }) => {
@@ -262,7 +263,7 @@ const LedgerPage: React.FC = () => {
       'पावती नं.': '',
       'तपशील': 'शिल्लक:',
       'जमा रक्कम': '',
-      'नावे रक्कम': `₹${Math.abs(balance).toFixed(2)}`
+      'नावे रक्कम': `${Math.abs(balance).toFixed(2)}`
     });
 
 
@@ -301,6 +302,9 @@ const LedgerPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100">
+      {/* Admin Header */}
+      {isAdmin && <AdminHeader title={`खाते ${accountName}`} showStats={true} />}
+      
       {/* Combined Header with School Building Background */}
       <div className="combined-header shadow-lg print:shadow-none">
         {/* School Header Section */}
@@ -328,7 +332,7 @@ const LedgerPage: React.FC = () => {
               <div className="flex items-center gap-4">
                 <div className="text-right text-sm english-font">
                   <div>Account No: {id}</div>
-                  <div>Balance: ₹{formatAmount(Math.abs(balance))}</div>
+                  <div>Balance: {formatAmount(Math.abs(balance))}</div>
                   {isAdmin && (
                     <div className="flex gap-2 mt-1">
                     <button
@@ -348,18 +352,6 @@ const LedgerPage: React.FC = () => {
                     </div>
                   )}
                 </div>
-                {isAdmin && (
-                  <button
-                    onClick={() => {
-                      logout();
-                      window.location.href = '/admin/login';
-                    }}
-                    className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs font-medium transition-colors flex items-center gap-1"
-                  >
-                    <LogOut className="w-3 h-3" />
-                    Logout
-                  </button>
-                )}
               </div>
             </div>
           </div>
@@ -380,46 +372,54 @@ const LedgerPage: React.FC = () => {
           <h2 className="text-lg font-bold marathi-font">{accountName}</h2>
         </div>
         
-        {/* Edit Entry Form */}
+        {/* Edit Entry Modal */}
         {editingEntry && (
-          <div className="bg-white rounded-lg page-shadow ledger-border p-4 mb-6 print:hidden">
-            <div className="text-center mb-4">
-              <h2 className="text-xl font-bold text-blue-800 marathi-font">
-                नोंद संपादित करा - {editingEntry.type}
-              </h2>
-            </div>
-
-            <form onSubmit={handleSaveEdit} className={`p-4 rounded-lg border-2 ${
-              editingEntry.type === 'जमा' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-            }`}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className={`block text-xs font-medium mb-1 marathi-font ${
-                    editingEntry.type === 'जमा' ? 'text-green-800' : 'text-red-800'
-                  }`}>
-                    तारीख *
-                  </label>
-                  <input
-                    type="date"
-                    name="date"
-                    value={editFormData.date}
-                    onChange={handleEditInputChange}
-                    required
-                    disabled={!isOnline}
-                    className={`w-full p-2 text-sm border rounded focus:ring-1 focus:border-500 ${
-                      editingEntry.type === 'जमा' 
-                        ? 'border-green-300 focus:ring-green-500 focus:border-green-500' 
-                        : 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                    } ${!isOnline ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                  />
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 print:hidden">
+            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-lg">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-blue-800 marathi-font">
+                    नोंद संपादित करा - {editingEntry.type}
+                  </h2>
+                  <button
+                    onClick={handleCancelEdit}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
                 </div>
-                <div>
-                  <label className={`block text-xs font-medium mb-1 marathi-font ${
-                    editingEntry.type === 'जमा' ? 'text-green-800' : 'text-red-800'
-                  }`}>
-                    खाते नंबर *
-                  </label>
-                  <div className="flex gap-2">
+              </div>
+
+              <form onSubmit={handleSaveEdit} className={`p-6 ${
+                editingEntry.type === 'जमा' ? 'bg-green-50' : 'bg-red-50'
+              }`}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 marathi-font ${
+                      editingEntry.type === 'जमा' ? 'text-green-800' : 'text-red-800'
+                    }`}>
+                      तारीख *
+                    </label>
+                    <input
+                      type="date"
+                      name="date"
+                      value={editFormData.date}
+                      onChange={handleEditInputChange}
+                      required
+                      disabled={!isOnline}
+                      className={`w-full p-3 text-sm border rounded-lg focus:ring-2 focus:ring-opacity-50 ${
+                        editingEntry.type === 'जमा' 
+                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500' 
+                          : 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                      } ${!isOnline ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    />
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 marathi-font ${
+                      editingEntry.type === 'जमा' ? 'text-green-800' : 'text-red-800'
+                    }`}>
+                      खाते नंबर *
+                    </label>
                     <input
                       type="text"
                       name="accountNumber"
@@ -428,7 +428,51 @@ const LedgerPage: React.FC = () => {
                       required
                       disabled={!isOnline}
                       placeholder="खाते नंबर"
-                      className={`flex-1 p-2 text-sm border rounded focus:ring-1 marathi-font ${
+                      className={`w-full p-3 text-sm border rounded-lg focus:ring-2 focus:ring-opacity-50 marathi-font ${
+                        editingEntry.type === 'जमा' 
+                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500' 
+                          : 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                      } ${!isOnline ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    />
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 marathi-font ${
+                      editingEntry.type === 'जमा' ? 'text-green-800' : 'text-red-800'
+                    }`}>
+                      पावती नंबर
+                    </label>
+                    <input
+                      type="text"
+                      name="receiptNumber"
+                      value={editFormData.receiptNumber}
+                      onChange={handleEditInputChange}
+                      disabled={!isOnline}
+                      placeholder="पावती नंबर"
+                      className={`w-full p-3 text-sm border rounded-lg focus:ring-2 focus:ring-opacity-50 marathi-font ${
+                        editingEntry.type === 'जमा' 
+                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500' 
+                          : 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                      } ${!isOnline ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    />
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 marathi-font ${
+                      editingEntry.type === 'जमा' ? 'text-green-800' : 'text-red-800'
+                    }`}>
+                      रक्कम *
+                    </label>
+                    <input
+                      type="number"
+                      name="amount"
+                      value={editFormData.amount}
+                      onChange={handleEditInputChange}
+                      onBlur={(e) => handleEditAmountBlur(e.target.value)}
+                      required
+                      disabled={!isOnline}
+                      placeholder="0.00"
+                      step="0.01"
+                      min="0"
+                      className={`w-full p-3 text-sm border rounded-lg focus:ring-2 focus:ring-opacity-50 english-font ${
                         editingEntry.type === 'जमा' 
                           ? 'border-green-300 focus:ring-green-500 focus:border-green-500' 
                           : 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -436,97 +480,53 @@ const LedgerPage: React.FC = () => {
                     />
                   </div>
                 </div>
-                <div>
-                  <label className={`block text-xs font-medium mb-1 marathi-font ${
+                
+                <div className="mb-6">
+                  <label className={`block text-sm font-medium mb-2 marathi-font ${
                     editingEntry.type === 'जमा' ? 'text-green-800' : 'text-red-800'
                   }`}>
-                    पावती नंबर
+                    तपशील *
                   </label>
-                  <input
-                    type="text"
-                    name="receiptNumber"
-                    value={editFormData.receiptNumber}
+                  <textarea
+                    name="details"
+                    value={editFormData.details}
                     onChange={handleEditInputChange}
-                    disabled={!isOnline}
-                    placeholder="पावती नंबर"
-                    className={`w-full p-2 text-sm border rounded focus:ring-1 focus:border-500 marathi-font ${
-                      editingEntry.type === 'जमा' 
-                        ? 'border-green-300 focus:ring-green-500 focus:border-green-500' 
-                        : 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                    } ${!isOnline ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                  />
-                </div>
-                <div>
-                  <label className={`block text-xs font-medium mb-1 marathi-font ${
-                    editingEntry.type === 'जमा' ? 'text-green-800' : 'text-red-800'
-                  }`}>
-                    रक्कम *
-                  </label>
-                  <input
-                    type="number"
-                    name="amount"
-                    value={editFormData.amount}
-                    onChange={handleEditInputChange}
-                    onBlur={(e) => handleEditAmountBlur(e.target.value)}
                     required
                     disabled={!isOnline}
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0"
-                    className={`w-full p-2 text-sm border rounded focus:ring-1 focus:border-500 english-font ${
+                    placeholder="तपशील लिहा..."
+                    rows={4}
+                    className={`w-full p-3 text-sm border rounded-lg focus:ring-2 focus:ring-opacity-50 marathi-font resize-vertical ${
                       editingEntry.type === 'जमा' 
                         ? 'border-green-300 focus:ring-green-500 focus:border-green-500' 
                         : 'border-red-300 focus:ring-red-500 focus:border-red-500'
                     } ${!isOnline ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                   />
                 </div>
-              </div>
-              
-              <div className="mb-4">
-                <label className={`block text-xs font-medium mb-1 marathi-font ${
-                  editingEntry.type === 'जमा' ? 'text-green-800' : 'text-red-800'
-                }`}>
-                  तपशील *
-                </label>
-                <textarea
-                  name="details"
-                  value={editFormData.details}
-                  onChange={handleEditInputChange}
-                  required
-                  disabled={!isOnline}
-                  placeholder="तपशील लिहा..."
-                  rows={4}
-                  className={`w-full p-2 text-sm border rounded focus:ring-1 focus:border-500 marathi-font resize-vertical ${
-                    editingEntry.type === 'जमा' 
-                      ? 'border-green-300 focus:ring-green-500 focus:border-green-500' 
-                      : 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                  } ${!isOnline ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                />
-              </div>
-              
-              <div className="flex flex-wrap gap-3 justify-center">
-                <button
-                  type="submit"
-                  disabled={!isOnline}
-                  className={`px-6 py-2 rounded font-medium english-font transition-colors flex items-center gap-2 text-sm ${
-                    isOnline 
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                      : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                  }`}
-                >
-                  <Save className="w-4 h-4" />
-                  Save Changes
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCancelEdit}
-                  className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded font-medium english-font transition-colors flex items-center gap-2 text-sm"
-                >
-                  <X className="w-4 h-4" />
-                  Cancel
-                </button>
-              </div>
-            </form>
+                
+                <div className="flex flex-wrap gap-3 justify-end">
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium english-font transition-colors flex items-center gap-2"
+                  >
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!isOnline}
+                    className={`px-6 py-3 rounded-lg font-medium english-font transition-colors flex items-center gap-2 ${
+                      isOnline 
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                        : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                    }`}
+                  >
+                    <Save className="w-4 h-4" />
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
 
@@ -572,10 +572,10 @@ const LedgerPage: React.FC = () => {
                           )}
                         </td>
                         <td className="p-2 text-right font-medium english-font border border-black">
-                          {entry.type === 'जमा' ? `₹${formatAmount(entry.amount)}` : '-'}
+                          {entry.type === 'जमा' ? `${formatAmount(entry.amount)}` : '-'}
                         </td>
                         <td className="p-2 text-right font-medium english-font border border-black">
-                          {entry.type === 'नावे' ? `₹${formatAmount(entry.amount)}` : '-'}
+                          {entry.type === 'नावे' ? `${formatAmount(entry.amount)}` : '-'}
                         </td>
                       </tr>
                     );
@@ -587,10 +587,10 @@ const LedgerPage: React.FC = () => {
                       एकूण:
                     </td>
                     <td className="p-2 text-right english-font border border-black">
-                      ₹{formatAmount(jamaTotal)}
+                      {formatAmount(jamaTotal)}
                     </td>
                     <td className="p-2 text-right english-font border border-black">
-                      ₹{formatAmount(naveTotal)}
+                      {formatAmount(naveTotal)}
                     </td>
                   </tr>
                   
@@ -600,7 +600,7 @@ const LedgerPage: React.FC = () => {
                       शिल्लक:
                     </td>
                     <td className="p-2 text-right english-font border border-black">
-                      ₹{formatAmount(Math.abs(balance))}
+                      {formatAmount(Math.abs(balance))}
                     </td>
                   </tr>
                   
