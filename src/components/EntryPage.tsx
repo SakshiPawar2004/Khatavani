@@ -16,7 +16,7 @@ const highlightAccountName = (details: string, accounts: { [key: string]: string
     // Remove any colons or spaces after the account name
     let rest = details.slice(found.length).replace(/^[:\s]+/, '');
     // Add a single colon
-    return <span><span style={{color:'#dc2626', fontWeight:'bold'}}>{found}:</span>{rest ? ' ' + rest : ''}</span>;
+    return <span><span style={{color:'#1d4ed8', fontWeight:'bold'}}>{found}:</span>{rest ? ' ' + rest : ''}</span>;
   }
   return details;
 };
@@ -68,6 +68,8 @@ const EntryPage: React.FC = () => {
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
+
+  // (Reverted) Removed dynamic filler row print logic
 
   // Load accounts and entries from Firebase
   useEffect(() => {
@@ -498,19 +500,7 @@ const EntryPage: React.FC = () => {
         'रक्कम ': `${Math.abs(dailyBalance).toFixed(2)}`
       });
 
-      // Add empty row for separation between dates
-      excelData.push({
-        'तारीख': '',
-        'खाते नं.': '',
-        'पावती नं.': '',
-        'तपशील': '',
-        'रक्कम': '',
-        'तारीख ': '',
-        'खाते नं. ': '',
-        'पावती नं. ': '',
-        'तपशील ': '',
-        'रक्कम ': ''
-      });
+      // Removed extra blank separator row between dates
     });
 
     // Create workbook and worksheet
@@ -1212,19 +1202,25 @@ const EntryPage: React.FC = () => {
             )}
             
             <div className="overflow-x-auto">
-              <table className="w-full text-sm print:text-base table-fixed border border-black">
+              <table className="w-full text-sm print:text-base table-fixed border border-black entry-table">
                 <thead>
                   {/* Sub Headers */}
                   <tr className="bg-amber-500 text-white print:bg-gray-50 print:text-black">
                     <th className="p-1 text-left marathi-font border border-black date-column text-center align-middle">तारीख</th>
                     <th className="p-1 text-left marathi-font border border-black account-column text-center align-middle">खाते नं.</th>
                     <th className="p-1 text-left marathi-font border border-black receipt-column text-center align-middle">पावती नं.</th>
-                    <th className="p-1 text-left marathi-font border border-black details-column text-center align-middle">तपशील</th>
+                    <th className="p-1 text-left marathi-font border border-black details-column text-center align-middle">
+                      <span className="print:hidden">जमेचा तपशील</span>
+                      <span className="hidden print:inline">तपशील</span>
+                    </th>
                     <th className="p-1 text-right marathi-font border border-black amount-column text-center align-middle">रक्कम</th>
                     <th className="p-1 text-left marathi-font border border-black date-column text-center align-middle">तारीख</th>
                     <th className="p-1 text-left marathi-font border border-black account-column text-center align-middle">खाते नं.</th>
                     <th className="p-1 text-left marathi-font border border-black receipt-column text-center align-middle">पावती नं.</th>
-                    <th className="p-1 text-left marathi-font border border-black details-column text-center align-middle">तपशील</th>
+                    <th className="p-1 text-left marathi-font border border-black details-column text-center align-middle">
+                      <span className="print:hidden">नावेचा तपशील</span>
+                      <span className="hidden print:inline">तपशील</span>
+                    </th>
                     <th className="p-1 text-right marathi-font border border-black amount-column text-center align-middle">रक्कम</th>
                   </tr>
                 </thead>

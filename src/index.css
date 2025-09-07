@@ -2,31 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Screen-only styles for EntryPage table widths */
+.entry-table { table-layout: auto; width: 100%; }
+.entry-table .date-column { width: 6ch; }
+.entry-table .account-column { width: 2.5ch; }
+.entry-table .amount-column { width: 10ch; }
+.entry-table .details-column { width: auto; }
+
 /* Print-specific styles for ledger table */
 @media print {
+  /* (Reverted) removed dynamic filler styles */
+  tr.daily-total-row, tr.balance-row { page-break-inside: avoid; }
   .print-table-fixed {
     table-layout: fixed;
     width: 100%;
   }
   
   .print-date-col {
-    width: 12%;
+    width: 10%;
     min-width: 60px;
   }
   
-  .print-account-col {
+  .print-kird-pan-col {
     width: 8%;
     min-width: 50px;
   }
   
   .print-details-col {
-    width: 50%;
-    min-width: 200px;
+    width: 58%;
+    min-width: 280px;
   }
   
   .print-amount-col {
-    width: 15%;
+    width: 12%;
     min-width: 80px;
+    max-width: 100px;
   }
   
   .print-break-words {

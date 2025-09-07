@@ -243,7 +243,7 @@ const LedgerPage: React.FC = () => {
     // Prepare data for Excel - export exactly as shown in the ledger table
     const excelData = sortedEntries.map((entry: Entry) => ({
       'तारीख': formatDate(entry.date),
-      'पावती नं.': entry.receiptNumber || '-',
+      'किर्द पान नं.': '', // Blank column
       'तपशील': stripAccountName(entry.details, accounts),
       'जमा रक्कम': entry.type === 'जमा' ? entry.amount.toFixed(2) : '-',
       'नावे रक्कम': entry.type === 'नावे' ? entry.amount.toFixed(2) : '-'
@@ -252,7 +252,7 @@ const LedgerPage: React.FC = () => {
     // Add total row
     excelData.push({
       'तारीख': '',
-      'पावती नं.': '',
+      'किर्द पान नं.': '',
       'तपशील': 'एकूण:',
       'जमा रक्कम': jamaTotal.toFixed(2),
       'नावे रक्कम': naveTotal.toFixed(2)
@@ -261,7 +261,7 @@ const LedgerPage: React.FC = () => {
     // Add balance row
     excelData.push({
       'तारीख': '',
-      'पावती नं.': '',
+      'किर्द पान नं.': '',
       'तपशील': 'शिल्लक:',
       'जमा रक्कम': '',
       'नावे रक्कम': `${Math.abs(balance).toFixed(2)}`
@@ -368,7 +368,7 @@ const LedgerPage: React.FC = () => {
       <div className="container mx-auto px-4 py-8 print:px-2 print:py-2">
         {/* Print-only Account Name Header */}
         <div className="hidden print:block text-center mb-4">
-          <h2 className="text-lg font-bold marathi-font">{accountName}</h2>
+          <h2 className="text-lg font-bold marathi-font">{id}. {accountName}</h2>
         </div>
         
         {/* Edit Entry Modal */}
@@ -537,7 +537,7 @@ const LedgerPage: React.FC = () => {
                 <thead>
                   <tr className="bg-amber-600 text-white print:bg-gray-100 print:text-black">
                     <th className="p-2 text-center marathi-font border border-black align-middle print-date-col">तारीख</th>
-                    <th className="p-2 text-center marathi-font border border-black align-middle print-account-col">खाते नं.</th>
+                    <th className="p-2 text-center marathi-font border border-black align-middle print-kird-pan-col">किर्द पान नं.</th>
                     <th className="p-2 text-center marathi-font border border-black align-middle print-details-col">तपशील</th>
                     <th className="p-2 text-center marathi-font border border-black align-middle print-amount-col">जमा रक्कम</th>
                     <th className="p-2 text-center marathi-font border border-black align-middle print-amount-col">नावे रक्कम</th>
@@ -550,8 +550,8 @@ const LedgerPage: React.FC = () => {
                         <td className="p-2 english-font border border-black text-center align-middle print-date-col print:text-xs">
                           {formatDate(entry.date)}
                         </td>
-                        <td className="p-2 marathi-font border border-black text-center align-middle print-account-col print:text-xs">
-                          {entry.accountNumber}
+                        <td className="p-2 marathi-font border border-black text-center align-middle print-kird-pan-col print:text-xs">
+                          {/* Blank column for किर्द पान नं. */}
                         </td>
                         <td className="p-2 marathi-font leading-relaxed border border-black text-wrap print-details-col print-break-words print:text-xs">
                           {stripAccountName(entry.details, accounts)}
