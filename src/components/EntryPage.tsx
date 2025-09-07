@@ -619,9 +619,8 @@ const EntryPage: React.FC = () => {
             <div className="flex items-center justify-between flex-wrap gap-4">
               <Link 
                 to="/" 
-                className="flex items-center gap-2 bg-black bg-opacity-30 hover:bg-opacity-40 px-4 py-2 rounded-lg transition-colors"
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors"
               >
-
                 <ArrowLeft className="w-4 h-4" />
                 <span className="english-font">खतावणी बघा</span>
               </Link>
