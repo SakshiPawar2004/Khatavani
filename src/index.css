@@ -1,3 +1,51 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Print-specific styles for ledger table */
+@media print {
+  .print-table-fixed {
+    table-layout: fixed;
+    width: 100%;
+  }
+  
+  .print-date-col {
+    width: 12%;
+    min-width: 60px;
+  }
+  
+  .print-account-col {
+    width: 8%;
+    min-width: 50px;
+  }
+  
+  .print-details-col {
+    width: 50%;
+    min-width: 200px;
+  }
+  
+  .print-amount-col {
+    width: 15%;
+    min-width: 80px;
+  }
+  
+  .print-break-words {
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Page break after each date group in EntryPage */
+  .print-page-break-after {
+    page-break-after: always;
+  }
+  
+  .print-page-break-inside-avoid {
+    page-break-inside: avoid;
+  }
+  
+  /* Ensure date groups don't break across pages */
+  .print-date-group {
+    page-break-inside: avoid;
+  }
+}

@@ -5,6 +5,7 @@ import { ArrowLeft, FileText, Printer, Edit3, Trash2, Download, Wifi, WifiOff, S
 import * as XLSX from 'xlsx';
 import { accountsFirebase, entriesFirebase, Account, Entry, handleFirebaseError } from '../services/firebaseService';
 import AdminHeader from './AdminHeader';
+import { formatDate, formatDateForFilename } from '../utils/dateUtils';
 
 // Helper to highlight account name at start of details
 const highlightAccountName = (details: string, accounts: { [key: string]: string }) => {
@@ -241,7 +242,7 @@ const LedgerPage: React.FC = () => {
 
     // Prepare data for Excel - export exactly as shown in the ledger table
     const excelData = sortedEntries.map((entry: Entry) => ({
-      'तारीख': new Date(entry.date).toLocaleDateString('en-IN'),
+      'तारीख': formatDate(entry.date),
       'पावती नं.': entry.receiptNumber || '-',
       'तपशील': stripAccountName(entry.details, accounts),
       'जमा रक्कम': entry.type === 'जमा' ? entry.amount.toFixed(2) : '-',
@@ -275,7 +276,7 @@ const LedgerPage: React.FC = () => {
     XLSX.utils.book_append_sheet(wb, ws, `खाते_${id}_${accountName}`);
 
     // Generate Excel file and download
-    XLSX.writeFile(wb, `खाते_${id}_${accountName}_${new Date().toLocaleDateString('en-IN').replace(/\//g, '-')}.xlsx`);
+    XLSX.writeFile(wb, `खाते_${id}_${accountName}_${formatDateForFilename(new Date())}.xlsx`);
   };
 
   // Format amount to show .00
@@ -309,9 +310,7 @@ const LedgerPage: React.FC = () => {
       <div className="combined-header shadow-lg print:shadow-none">
         {/* School Header Section */}
         <div className="school-header-section marathi-font">
-          टी झेड पवार माध्यमिक विद्यालय गोराणे
-          <br />
-          ता. बागलाण जि. नाशिक
+          टी झेड पवार माध्यमिक विद्यालय गोराणे  ता. बागलाण जि. नाशिक
         </div>
         
         {/* Main Header Section */}
@@ -534,27 +533,27 @@ const LedgerPage: React.FC = () => {
         {accountEntries.length > 0 ? (
           <div className="bg-white rounded-lg page-shadow ledger-border overflow-hidden print:shadow-none print:border-0 print:rounded-none">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm print:text-base border border-black">
+              <table className="w-full text-sm print:text-base border border-black print-table-fixed">
                 <thead>
                   <tr className="bg-amber-600 text-white print:bg-gray-100 print:text-black">
-                    <th className="p-2 text-center marathi-font border border-black align-middle">तारीख</th>
-                    <th className="p-2 text-center marathi-font border border-black align-middle">खाते नं.</th>
-                    <th className="p-2 text-center marathi-font border border-black align-middle">तपशील</th>
-                    <th className="p-2 text-center marathi-font border border-black align-middle">जमा रक्कम</th>
-                    <th className="p-2 text-center marathi-font border border-black align-middle">नावे रक्कम</th>
+                    <th className="p-2 text-center marathi-font border border-black align-middle print-date-col">तारीख</th>
+                    <th className="p-2 text-center marathi-font border border-black align-middle print-account-col">खाते नं.</th>
+                    <th className="p-2 text-center marathi-font border border-black align-middle print-details-col">तपशील</th>
+                    <th className="p-2 text-center marathi-font border border-black align-middle print-amount-col">जमा रक्कम</th>
+                    <th className="p-2 text-center marathi-font border border-black align-middle print-amount-col">नावे रक्कम</th>
                   </tr>
                 </thead>
                 <tbody>
                   {sortedEntries.map((entry, index) => {
                     return (
                       <tr key={entry.id} className="hover:bg-amber-50 transition-colors border-b print:hover:bg-transparent print:bg-white">
-                        <td className="p-2 english-font border border-black text-center align-middle">
-                          {new Date(entry.date).toLocaleDateString('en-IN')}
+                        <td className="p-2 english-font border border-black text-center align-middle print-date-col print:text-xs">
+                          {formatDate(entry.date)}
                         </td>
-                        <td className="p-2 marathi-font border border-black text-center align-middle">
+                        <td className="p-2 marathi-font border border-black text-center align-middle print-account-col print:text-xs">
                           {entry.accountNumber}
                         </td>
-                        <td className="p-2 marathi-font leading-relaxed border border-black text-wrap">
+                        <td className="p-2 marathi-font leading-relaxed border border-black text-wrap print-details-col print-break-words print:text-xs">
                           {stripAccountName(entry.details, accounts)}
                           {entry.id && isAdmin && (
                             <button
@@ -571,10 +570,10 @@ const LedgerPage: React.FC = () => {
                             </button>
                           )}
                         </td>
-                        <td className="p-2 text-right font-medium english-font border border-black">
+                        <td className="p-2 text-right font-medium english-font border border-black print-amount-col print:text-xs">
                           {entry.type === 'जमा' ? `${formatAmount(entry.amount)}` : '-'}
                         </td>
-                        <td className="p-2 text-right font-medium english-font border border-black">
+                        <td className="p-2 text-right font-medium english-font border border-black print-amount-col print:text-xs">
                           {entry.type === 'नावे' ? `${formatAmount(entry.amount)}` : '-'}
                         </td>
                       </tr>
@@ -583,23 +582,23 @@ const LedgerPage: React.FC = () => {
                   
                   {/* Total Row */}
                   <tr className="bg-blue-100 font-bold print:bg-gray-100">
-                    <td colSpan={3} className="p-2 text-right marathi-font border border-black">
+                    <td colSpan={3} className="p-2 text-right marathi-font border border-black print:text-xs">
                       एकूण:
                     </td>
-                    <td className="p-2 text-right english-font border border-black">
+                    <td className="p-2 text-right english-font border border-black print-amount-col print:text-xs">
                       {formatAmount(jamaTotal)}
                     </td>
-                    <td className="p-2 text-right english-font border border-black">
+                    <td className="p-2 text-right english-font border border-black print-amount-col print:text-xs">
                       {formatAmount(naveTotal)}
                     </td>
                   </tr>
                   
                   {/* Balance Row */}
                   <tr className="bg-green-100 font-bold print:bg-gray-200">
-                    <td colSpan={4} className="p-2 text-right marathi-font border border-black">
+                    <td colSpan={4} className="p-2 text-right marathi-font border border-black print:text-xs">
                       शिल्लक:
                     </td>
-                    <td className="p-2 text-right english-font border border-black">
+                    <td className="p-2 text-right english-font border border-black print-amount-col print:text-xs">
                       {formatAmount(Math.abs(balance))}
                     </td>
                   </tr>

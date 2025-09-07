@@ -5,6 +5,7 @@ import { BookOpen, Plus, Edit3, Edit, Trash2, Save, X, Download, Wifi, WifiOff, 
 import * as XLSX from 'xlsx';
 import { accountsFirebase, entriesFirebase, Account, Entry, handleFirebaseError } from '../services/firebaseService';
 import AdminHeader from './AdminHeader';
+import { formatDate, formatDateForFilename } from '../utils/dateUtils';
 
 const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -185,7 +186,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ hideAdminHeader = fal
     XLSX.utils.book_append_sheet(wb, ws, 'खतावणी अनुक्रमणिका');
 
     // Generate Excel file and download
-    XLSX.writeFile(wb, `खतावणी_अनुक्रमणिका_${new Date().toLocaleDateString('en-IN').replace(/\//g, '-')}.xlsx`);
+    XLSX.writeFile(wb, `खतावणी_अनुक्रमणिका_${formatDateForFilename(new Date())}.xlsx`);
   };
 
   const handleExportAllAccountsTransactions = async () => {
@@ -238,7 +239,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ hideAdminHeader = fal
           sortedEntries.forEach(entry => {
             excelData.push({
               'खाते नं. व नाव': '',
-              'तारीख': new Date(entry.date).toLocaleDateString('en-IN'),
+              'तारीख': formatDate(entry.date),
               'पावती नं.': entry.receiptNumber || '-',
               'तपशील': stripAccountName(entry.details, accountNameMap),
               'जमा रक्कम': entry.type === 'जमा' ? entry.amount.toFixed(2) : '-',
@@ -305,7 +306,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ hideAdminHeader = fal
       XLSX.utils.book_append_sheet(wb, ws, 'सर्व खाती व्यवहार');
 
       // Generate Excel file and download
-      XLSX.writeFile(wb, `सर्व_खाती_व्यवहार_${new Date().toLocaleDateString('en-IN').replace(/\//g, '-')}.xlsx`);
+      XLSX.writeFile(wb, `सर्व_खाती_व्यवहार_${formatDateForFilename(new Date())}.xlsx`);
     } catch (err) {
       alert('निर्यात करताना त्रुटी: ' + handleFirebaseError(err));
     }
@@ -349,9 +350,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ hideAdminHeader = fal
       <div className="combined-header shadow-lg print:shadow-none">
         {/* School Header Section */}
         <div className="school-header-section marathi-font">
-          टी झेड पवार माध्यमिक विद्यालय गोराणे
-          <br />
-          ता. बागलाण जि. नाशिक
+          टी झेड पवार माध्यमिक विद्यालय गोराणे ता. बागलाण जि. नाशिक
         </div>
         
         {/* Main Header Section - Only show for non-admin users */}

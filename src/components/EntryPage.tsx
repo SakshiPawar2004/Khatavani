@@ -5,6 +5,7 @@ import { ArrowLeft, Save, X, BookOpen, Printer, Edit3, Trash2, Plus, Download, W
 import * as XLSX from 'xlsx';
 import { accountsFirebase, entriesFirebase, Account, Entry, handleFirebaseError } from '../services/firebaseService';
 import AdminHeader from './AdminHeader';
+import { formatDate, formatDateForFilename } from '../utils/dateUtils';
 
 // Helper to highlight account name at start of details
 const highlightAccountName = (details: string, accounts: { [key: string]: string }) => {
@@ -438,7 +439,7 @@ const EntryPage: React.FC = () => {
         const naveEntry = naveEntriesForDate[i];
         
         excelData.push({
-          'तारीख': jamaEntry ? new Date(jamaEntry.date).toLocaleDateString('en-IN') : '',
+          'तारीख': jamaEntry ? formatDate(jamaEntry.date) : '',
           'खाते नं.': jamaEntry ? jamaEntry.accountNumber : '',
           'पावती नं.': jamaEntry ? (jamaEntry.receiptNumber || '-') : '',
           'तपशील': jamaEntry ? (() => {
@@ -450,7 +451,7 @@ const EntryPage: React.FC = () => {
             return jamaEntry.details;
           })() : '',
           'रक्कम': jamaEntry ? jamaEntry.amount.toFixed(2) : '',
-          'तारीख ': naveEntry ? new Date(naveEntry.date).toLocaleDateString('en-IN') : '',
+          'तारीख ': naveEntry ? formatDate(naveEntry.date) : '',
           'खाते नं. ': naveEntry ? naveEntry.accountNumber : '',
           'पावती नं. ': naveEntry ? (naveEntry.receiptNumber || '-') : '',
           'तपशील ': naveEntry ? (() => {
@@ -531,7 +532,7 @@ const EntryPage: React.FC = () => {
     });
 
     // Generate Excel file and download
-    XLSX.writeFile(wb, `किर्दवही_नोंदी_${new Date().toLocaleDateString('en-IN').replace(/\//g, '-')}.xlsx`);
+    XLSX.writeFile(wb, `किर्दवही_नोंदी_${formatDateForFilename(new Date())}.xlsx`);
   };
 
   // Sort entries by date first, then by account number
@@ -609,10 +610,8 @@ const EntryPage: React.FC = () => {
       <div className="combined-header shadow-lg print:shadow-none">
         {/* School Header Section */}
         <div className="school-header-section marathi-font">
-          टी झेड पवार माध्यमिक विद्यालय गोराणे
-          <br />
-          ता. बागलाण जि. नाशिक
-        </div>
+          टी झेड पवार माध्यमिक विद्यालय गोराणे ता. बागलाण जि. नाशिक
+          </div>
         
         {/* Main Header Section */}
         <div className="main-header-section print:hidden">
@@ -622,6 +621,7 @@ const EntryPage: React.FC = () => {
                 to="/" 
                 className="flex items-center gap-2 bg-black bg-opacity-30 hover:bg-opacity-40 px-4 py-2 rounded-lg transition-colors"
               >
+
                 <ArrowLeft className="w-4 h-4" />
                 <span className="english-font">खतावणी बघा</span>
               </Link>
@@ -652,7 +652,6 @@ const EntryPage: React.FC = () => {
       <div className="container mx-auto px-4 py-6 max-w-7xl print:px-2 print:py-2">
         {/* Print-only Account Name Header */}
         <div className="hidden print:block text-center mb-4">
-          <h2 className="text-lg font-bold marathi-font">सर्व खाती व्यवहार</h2>
         </div>
         
         {/* Add Account Form */}
@@ -1230,152 +1229,160 @@ const EntryPage: React.FC = () => {
                     <th className="p-1 text-right marathi-font border border-black amount-column text-center align-middle">रक्कम</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {Object.entries(entriesByDate).map(([date, dateEntries], dateIndex, dateArray) => {
-                    // Create rows where जमा and नावे entries are displayed side by side
-                    const jamaEntriesForDate = dateEntries.filter(e => e.type === 'जमा');
-                    const naveEntriesForDate = dateEntries.filter(e => e.type === 'नावे');
-                    const maxEntries = Math.max(jamaEntriesForDate.length, naveEntriesForDate.length);
-                    
-                    const rows = [];
-                    
-                    // Add entry rows for this date
-                    for (let i = 0; i < maxEntries; i++) {
-                      const jamaEntry = jamaEntriesForDate[i];
-                      const naveEntry = naveEntriesForDate[i];
+                {Object.entries(entriesByDate).map(([date, dateEntries], dateIndex, dateArray) => {
+                  // Create rows where जमा and नावे entries are displayed side by side
+                  const jamaEntriesForDate = dateEntries.filter(e => e.type === 'जमा');
+                  const naveEntriesForDate = dateEntries.filter(e => e.type === 'नावे');
+                  const maxEntries = Math.max(jamaEntriesForDate.length, naveEntriesForDate.length);
+                  
+                  // Check if this is the last date group
+                  const isLastDate = dateIndex === dateArray.length - 1;
+                  
+                  return (
+                    <tbody key={date} className={`print-date-group ${!isLastDate ? 'print-page-break-after' : ''}`}>
+                      {/* Add entry rows for this date */}
+                      {Array.from({ length: maxEntries }, (_, i) => {
+                        const jamaEntry = jamaEntriesForDate[i];
+                        const naveEntry = naveEntriesForDate[i];
+                        
+                        return (
+                          <tr key={`${date}-${i}`} className="hover:bg-amber-50 transition-colors border-b print:hover:bg-transparent print:bg-white print-page-break-inside-avoid">
+                            {/* जमा side columns */}
+                            <td className="p-1 english-font border border-black date-column text-center align-middle">
+                              {jamaEntry ? formatDate(jamaEntry.date) : ''}
+                            </td>
+                            <td className="p-1 marathi-font font-medium border border-black account-column text-center align-middle">
+                              {jamaEntry ? jamaEntry.accountNumber : ''}
+                            </td>
+                            <td className="p-1 marathi-font border border-black receipt-column text-center align-middle">
+                              {jamaEntry ? (jamaEntry.receiptNumber || '-') : ''}
+                            </td>
+                            <td className="p-1 marathi-font leading-relaxed border border-black details-column text-wrap">
+                              {jamaEntry ? highlightAccountName(jamaEntry.details, accounts) : ''}
+                              {jamaEntry && jamaEntry.id && isAdmin && (
+                                <>
+                                  <button
+                                    onClick={() => handleEditEntry(jamaEntry)}
+                                    disabled={!isOnline}
+                                    className={`edit-btn ml-2 p-1 rounded text-xs print:hidden ${
+                                      isOnline 
+                                        ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    }`}
+                                    title="Edit Entry"
+                                  >
+                                    <Edit3 className="w-3 h-3" />
+                                  </button>
+                                                                   <button
+                                     onClick={() => handleDeleteEntry(jamaEntry.id!)}
+                                    disabled={!isOnline}
+                                    className={`delete-btn ml-2 p-1 rounded text-xs print:hidden ${
+                                      isOnline 
+                                        ? 'bg-red-500 hover:bg-red-600 text-white' 
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    }`}
+                                    title="Delete Entry"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                </>
+                              )}
+                            </td>
+                            <td className="p-1 text-right font-medium english-font border border-black amount-column">
+                              {jamaEntry ? `${formatAmount(jamaEntry.amount)}` : ''}
+                            </td>
+                            
+                            {/* नावे side columns */}
+                            <td className="p-1 english-font border border-black date-column text-center align-middle">
+                              {naveEntry ? formatDate(naveEntry.date) : ''}
+                            </td>
+                            <td className="p-1 marathi-font font-medium border border-black account-column text-center align-middle">
+                              {naveEntry ? naveEntry.accountNumber : ''}
+                            </td>
+                            <td className="p-1 marathi-font border border-black receipt-column text-center align-middle">
+                              {naveEntry ? (naveEntry.receiptNumber || '-') : ''}
+                            </td>
+                            <td className="p-1 marathi-font leading-relaxed border border-black details-column text-wrap">
+                              {naveEntry ? highlightAccountName(naveEntry.details, accounts) : ''}
+                              {naveEntry && naveEntry.id && isAdmin && (
+                                <>
+                                  <button
+                                    onClick={() => handleEditEntry(naveEntry)}
+                                    disabled={!isOnline}
+                                    className={`edit-btn ml-2 p-1 rounded text-xs print:hidden ${
+                                      isOnline 
+                                        ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    }`}
+                                    title="Edit Entry"
+                                  >
+                                    <Edit3 className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteEntry(naveEntry.id!)}
+                                    disabled={!isOnline}
+                                    className={`delete-btn ml-2 p-1 rounded text-xs print:hidden ${
+                                      isOnline 
+                                        ? 'bg-red-500 hover:bg-red-600 text-white' 
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    }`}
+                                    title="Delete Entry"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                </>
+                              )}
+                            </td>
+                            <td className="p-1 text-right font-medium english-font border border-black amount-column">
+                              {naveEntry ? `${formatAmount(naveEntry.amount)}` : ''}
+                            </td>
+                          </tr>
+                        );
+                      })}
                       
-                      rows.push(
-                        <tr key={`${date}-${i}`} className="hover:bg-amber-50 transition-colors border-b print:hover:bg-transparent print:bg-white">
-                          {/* जमा side columns */}
-                          <td className="p-1 english-font border border-black date-column text-center align-middle">
-                            {jamaEntry ? new Date(jamaEntry.date).toLocaleDateString('en-IN') : ''}
-                          </td>
-                          <td className="p-1 marathi-font font-medium border border-black account-column text-center align-middle">
-                            {jamaEntry ? jamaEntry.accountNumber : ''}
-                          </td>
-                          <td className="p-1 marathi-font border border-black receipt-column text-center align-middle">
-                            {jamaEntry ? (jamaEntry.receiptNumber || '-') : ''}
-                          </td>
-                          <td className="p-1 marathi-font leading-relaxed border border-black details-column text-wrap">
-                            {jamaEntry ? highlightAccountName(jamaEntry.details, accounts) : ''}
-                            {jamaEntry && jamaEntry.id && isAdmin && (
-                              <>
-                                <button
-                                  onClick={() => handleEditEntry(jamaEntry)}
-                                  disabled={!isOnline}
-                                  className={`edit-btn ml-2 p-1 rounded text-xs print:hidden ${
-                                    isOnline 
-                                      ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                  }`}
-                                  title="Edit Entry"
-                                >
-                                  <Edit3 className="w-3 h-3" />
-                                </button>
-                                                                 <button
-                                   onClick={() => handleDeleteEntry(jamaEntry.id!)}
-                                  disabled={!isOnline}
-                                  className={`delete-btn ml-2 p-1 rounded text-xs print:hidden ${
-                                    isOnline 
-                                      ? 'bg-red-500 hover:bg-red-600 text-white' 
-                                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                  }`}
-                                  title="Delete Entry"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
-                              </>
-                            )}
-                          </td>
-                          <td className="p-1 text-right font-medium english-font border border-black amount-column">
-                            {jamaEntry ? `${formatAmount(jamaEntry.amount)}` : ''}
-                          </td>
-                          
-                          {/* नावे side columns */}
-                          <td className="p-1 english-font border border-black date-column text-center align-middle">
-                            {naveEntry ? new Date(naveEntry.date).toLocaleDateString('en-IN') : ''}
-                          </td>
-                          <td className="p-1 marathi-font font-medium border border-black account-column text-center align-middle">
-                            {naveEntry ? naveEntry.accountNumber : ''}
-                          </td>
-                          <td className="p-1 marathi-font border border-black receipt-column text-center align-middle">
-                            {naveEntry ? (naveEntry.receiptNumber || '-') : ''}
-                          </td>
-                          <td className="p-1 marathi-font leading-relaxed border border-black details-column text-wrap">
-                            {naveEntry ? highlightAccountName(naveEntry.details, accounts) : ''}
-                            {naveEntry && naveEntry.id && isAdmin && (
-                              <>
-                                <button
-                                  onClick={() => handleEditEntry(naveEntry)}
-                                  disabled={!isOnline}
-                                  className={`edit-btn ml-2 p-1 rounded text-xs print:hidden ${
-                                    isOnline 
-                                      ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                  }`}
-                                  title="Edit Entry"
-                                >
-                                  <Edit3 className="w-3 h-3" />
-                                </button>
-                                                                 <button
-                                   onClick={() => handleDeleteEntry(naveEntry.id!)}
-                                  disabled={!isOnline}
-                                  className={`delete-btn ml-2 p-1 rounded text-xs print:hidden ${
-                                    isOnline 
-                                      ? 'bg-red-500 hover:bg-red-600 text-white' 
-                                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                  }`}
-                                  title="Delete Entry"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
-                              </>
-                            )}
-                          </td>
-                          <td className="p-1 text-right font-medium english-font border border-black amount-column">
-                            {naveEntry ? `${formatAmount(naveEntry.amount)}` : ''}
-                          </td>
-                        </tr>
-                      );
-                    }
-                    
-                    // Add daily total row
-                    const dailyJamaTotal = jamaEntriesForDate.reduce((sum, entry) => sum + entry.amount, 0);
-                    const dailyNaveTotal = naveEntriesForDate.reduce((sum, entry) => sum + entry.amount, 0);
-                    
-                    rows.push(
-                      <tr key={`${date}-daily-total`} className="daily-total-row bg-blue-100 font-medium print:bg-gray-100">
-                        <td colSpan={4} className="p-2 text-right marathi-font border border-black">
-                          एकूण:
-                        </td>
-                        <td className="p-2 text-right english-font border border-black">
-                          {formatAmount(dailyJamaTotal)}
-                        </td>
-                        <td colSpan={4} className="p-2 text-right marathi-font border border-black">
-                          एकूण:
-                        </td>
-                        <td className="p-2 text-right english-font border border-black">
-                          {formatAmount(dailyNaveTotal)}
-                        </td>
-                      </tr>
-                    );
+                      {/* Add daily total row */}
+                      {(() => {
+                        const dailyJamaTotal = jamaEntriesForDate.reduce((sum, entry) => sum + entry.amount, 0);
+                        const dailyNaveTotal = naveEntriesForDate.reduce((sum, entry) => sum + entry.amount, 0);
+                        
+                        return (
+                          <tr className="daily-total-row bg-blue-100 font-medium print:bg-gray-100 print-page-break-inside-avoid">
+                            <td colSpan={4} className="p-2 text-right marathi-font border border-black">
+                              एकूण:
+                            </td>
+                            <td className="p-2 text-right english-font border border-black">
+                              {formatAmount(dailyJamaTotal)}
+                            </td>
+                            <td colSpan={4} className="p-2 text-right marathi-font border border-black">
+                              एकूण:
+                            </td>
+                            <td className="p-2 text-right english-font border border-black">
+                              {formatAmount(dailyNaveTotal)}
+                            </td>
+                          </tr>
+                        );
+                      })()}
 
-                    // Add शिल्लक row after each date
-                    const dailyBalance = dailyJamaTotal - dailyNaveTotal;
-                    rows.push(
-                      <tr key={`${date}-balance`} className="balance-row bg-green-100 font-bold print:bg-gray-200">
-                        <td colSpan={9} className="p-2 text-right marathi-font border border-black">
-                          शिल्लक:
-                        </td>
-                        <td className="p-2 text-right english-font border border-black">
-                          {formatAmount(Math.abs(dailyBalance))}
-                        </td>
-                      </tr>
-                    );
-
-                    return rows;
-                  })}
-                </tbody>
+                      {/* Add शिल्लक row after each date */}
+                      {(() => {
+                        const dailyJamaTotal = jamaEntriesForDate.reduce((sum, entry) => sum + entry.amount, 0);
+                        const dailyNaveTotal = naveEntriesForDate.reduce((sum, entry) => sum + entry.amount, 0);
+                        const dailyBalance = dailyJamaTotal - dailyNaveTotal;
+                        
+                        return (
+                          <tr className="balance-row bg-green-100 font-bold print:bg-gray-200 print-page-break-inside-avoid">
+                            <td colSpan={9} className="p-2 text-right marathi-font border border-black">
+                              शिल्लक:
+                            </td>
+                            <td className="p-2 text-right english-font border border-black">
+                              {formatAmount(Math.abs(dailyBalance))}
+                            </td>
+                          </tr>
+                        );
+                      })()}
+                    </tbody>
+                  );
+                })}
               </table>
             </div>
           </div>

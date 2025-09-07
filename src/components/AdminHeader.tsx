@@ -67,7 +67,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
   const balance = stats.totalJama - stats.totalNave;
 
   return (
-    <div className="bg-gray-800 text-white shadow-lg">
+    <div className="bg-gray-800 text-white shadow-lg print:hidden">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
