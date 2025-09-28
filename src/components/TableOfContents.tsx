@@ -175,6 +175,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ hideAdminHeader = fal
     const excelData = accounts.map((account, index) => ({
       'खाते नं.': account.khateNumber,
       'नाव': account.name,
+      'किर्द पान नं.': '',
       'क्रमांक': index + 1
     }));
 
@@ -226,7 +227,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ hideAdminHeader = fal
           excelData.push({
             'खाते नं. व नाव': `खाते नं. ${account.khateNumber}-${account.name}`,
             'तारीख': '',
-            'पावती नं.': '',
+            'किर्द पान नं.': '',
             'तपशील': '',
             'जमा रक्कम': '',
             'नावे रक्कम': ''
@@ -240,7 +241,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ hideAdminHeader = fal
             excelData.push({
               'खाते नं. व नाव': '',
               'तारीख': formatDate(entry.date),
-              'पावती नं.': entry.receiptNumber || '-',
+              'किर्द पान नं.': '',
               'तपशील': stripAccountName(entry.details, accountNameMap),
               'जमा रक्कम': entry.type === 'जमा' ? entry.amount.toFixed(2) : '-',
               'नावे रक्कम': entry.type === 'नावे' ? entry.amount.toFixed(2) : '-'
@@ -258,7 +259,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ hideAdminHeader = fal
           excelData.push({
             'खाते नं. व नाव': '',
             'तारीख': '',
-            'पावती नं.': '',
+            'किर्द पान नं.': '',
             'तपशील': 'एकूण:',
             'जमा रक्कम': jamaTotal.toFixed(2),
             'नावे रक्कम': naveTotal.toFixed(2)
@@ -268,33 +269,15 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ hideAdminHeader = fal
           excelData.push({
             'खाते नं. व नाव': '',
             'तारीख': '',
-            'पावती नं.': '',
+            'किर्द पान नं.': '',
             'तपशील': 'शिल्लक:',
             'जमा रक्कम': '',
-            'नावे रक्कम': `₹${Math.abs(balance).toFixed(2)}`
+            'नावे रक्कम': `${Math.abs(balance).toFixed(2)}`
           });
 
           // Add balance row
 
-          // Add empty rows for separation between accounts (only if not the last account)
-          if (accountIndex < sortedAccounts.length - 1) {
-            excelData.push({
-              'खाते नं. व नाव': '',
-              'तारीख': '',
-              'पावती नं.': '',
-              'तपशील': '',
-              'जमा रक्कम': '',
-              'नावे रक्कम': ''
-            });
-            excelData.push({
-              'खाते नं. व नाव': '',
-              'तारीख': '',
-              'पावती नं.': '',
-              'तपशील': '',
-              'जमा रक्कम': '',
-              'नावे रक्कम': ''
-            });
-          }
+          // Removed extra empty rows between accounts
         }
       });
 

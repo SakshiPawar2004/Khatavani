@@ -444,7 +444,7 @@ const EntryPage: React.FC = () => {
           'तारीख': jamaEntry ? formatDate(jamaEntry.date) : '',
           'खाते नं.': jamaEntry ? jamaEntry.accountNumber : '',
           'पावती नं.': jamaEntry ? (jamaEntry.receiptNumber || '-') : '',
-          'तपशील': jamaEntry ? (() => {
+          'जमेचा तपशील': jamaEntry ? (() => {
             const found = Object.values(accounts).find(name => jamaEntry.details.startsWith(name));
             if (found) {
               let rest = jamaEntry.details.slice(found.length).replace(/^[:\s]+/, '');
@@ -456,7 +456,7 @@ const EntryPage: React.FC = () => {
           'तारीख ': naveEntry ? formatDate(naveEntry.date) : '',
           'खाते नं. ': naveEntry ? naveEntry.accountNumber : '',
           'पावती नं. ': naveEntry ? (naveEntry.receiptNumber || '-') : '',
-          'तपशील ': naveEntry ? (() => {
+          'नावेचा तपशील': naveEntry ? (() => {
             const found = Object.values(accounts).find(name => naveEntry.details.startsWith(name));
             if (found) {
               let rest = naveEntry.details.slice(found.length).replace(/^[:\s]+/, '');
@@ -476,12 +476,12 @@ const EntryPage: React.FC = () => {
         'तारीख': '',
         'खाते नं.': '',
         'पावती नं.': '',
-        'तपशील': 'एकूण:',
+        'जमेचा तपशील': 'एकूण:',
         'रक्कम': dailyJamaTotal.toFixed(2),
         'तारीख ': '',
         'खाते नं. ': '',
         'पावती नं. ': '',
-        'तपशील ': 'एकूण:',
+        'नावेचा तपशील': 'एकूण:',
         'रक्कम ': dailyNaveTotal.toFixed(2)
       });
 
@@ -491,12 +491,12 @@ const EntryPage: React.FC = () => {
         'तारीख': '',
         'खाते नं.': '',
         'पावती नं.': '',
-        'तपशील': '',
+        'जमेचा तपशील': '',
         'रक्कम': '',
         'तारीख ': '',
         'खाते नं. ': '',
         'पावती नं. ': '',
-        'तपशील ': 'शिल्लक:',
+        'नावेचा तपशील': 'शिल्लक:',
         'रक्कम ': `${Math.abs(dailyBalance).toFixed(2)}`
       });
 
@@ -1202,7 +1202,7 @@ const EntryPage: React.FC = () => {
             )}
             
             <div className="overflow-x-auto">
-              <table className="w-full text-sm print:text-base table-fixed border border-black entry-table">
+              <table className="w-full text-sm print:text-base table-fixed print:table-auto border border-black entry-table">
                 <thead>
                   {/* Sub Headers */}
                   <tr className="bg-amber-500 text-white print:bg-gray-50 print:text-black">
@@ -1211,7 +1211,7 @@ const EntryPage: React.FC = () => {
                     <th className="p-1 text-left marathi-font border border-black receipt-column text-center align-middle">पावती नं.</th>
                     <th className="p-1 text-left marathi-font border border-black details-column text-center align-middle">
                       <span className="print:hidden">जमेचा तपशील</span>
-                      <span className="hidden print:inline">तपशील</span>
+                      <span className="hidden print:inline">जमेचा तपशील</span>
                     </th>
                     <th className="p-1 text-right marathi-font border border-black amount-column text-center align-middle">रक्कम</th>
                     <th className="p-1 text-left marathi-font border border-black date-column text-center align-middle">तारीख</th>
@@ -1219,7 +1219,7 @@ const EntryPage: React.FC = () => {
                     <th className="p-1 text-left marathi-font border border-black receipt-column text-center align-middle">पावती नं.</th>
                     <th className="p-1 text-left marathi-font border border-black details-column text-center align-middle">
                       <span className="print:hidden">नावेचा तपशील</span>
-                      <span className="hidden print:inline">तपशील</span>
+                      <span className="hidden print:inline">नावेचा तपशील</span>
                     </th>
                     <th className="p-1 text-right marathi-font border border-black amount-column text-center align-middle">रक्कम</th>
                   </tr>
