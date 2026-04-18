@@ -140,7 +140,9 @@
   }
   
   .school-header-section {
-    color: black !important;
+    color: #9a3412 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
   
   /* Hide delete buttons during print */
@@ -437,6 +439,19 @@
   
   .print\\:col-span-6 {
     grid-column: span 6 / span 6 !important;
+  }
+
+  /* Accent color for important print headings */
+  .print-column-accent,
+  .print-account-title {
+    color: #9a3412 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print-column-accent {
+    background-color: #ffedd5 !important;
+    font-weight: 700 !important;
   }
 }
 

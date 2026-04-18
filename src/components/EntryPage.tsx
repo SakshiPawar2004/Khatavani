@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { ArrowLeft, Save, X, BookOpen, Printer, Edit3, Trash2, Plus, Download, Wifi, WifiOff } from 'lucide-react';
+import { ArrowLeft, Save, X, BookOpen, Printer, Edit3, Trash2, Plus, Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { accountsFirebase, entriesFirebase, Account, Entry, handleFirebaseError } from '../services/firebaseService';
+import { accountsFirebase, entriesFirebase, Entry, handleFirebaseError } from '../services/firebaseService';
 import AdminHeader from './AdminHeader';
 import { formatDate, formatDateForFilename } from '../utils/dateUtils';
 
@@ -24,8 +24,6 @@ const highlightAccountName = (details: string, accounts: { [key: string]: string
 const EntryPage: React.FC = () => {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [accounts, setAccounts] = useState<{ [key: string]: string }>({});
-  const [accountsList, setAccountsList] = useState<Account[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [jamaFormData, setJamaFormData] = useState({
@@ -53,7 +51,7 @@ const EntryPage: React.FC = () => {
     details: '',
     amount: ''
   });
-  const { isAdmin, logout } = useAuth();
+  const { isAdmin } = useAuth();
 
   // Monitor online/offline status
   useEffect(() => {
@@ -93,7 +91,6 @@ const EntryPage: React.FC = () => {
       
       // Load accounts
       const accountsData = await accountsFirebase.getAll();
-      setAccountsList(accountsData);
       const accountMap: { [key: string]: string } = {};
       accountsData.forEach((acc) => {
         accountMap[acc.khateNumber] = acc.name;
@@ -430,7 +427,7 @@ const EntryPage: React.FC = () => {
     // Prepare data for Excel - Start directly with data entries
     const excelData: any[] = [];
 
-    Object.entries(entriesByDate).forEach(([date, dateEntries]) => {
+    Object.entries(entriesByDate).forEach(([, dateEntries]) => {
       const jamaEntriesForDate = dateEntries.filter(e => e.type === 'जमा');
       const naveEntriesForDate = dateEntries.filter(e => e.type === 'नावे');
       const maxEntries = Math.max(jamaEntriesForDate.length, naveEntriesForDate.length);
@@ -546,13 +543,6 @@ const EntryPage: React.FC = () => {
     return acc;
   }, {} as { [key: string]: Entry[] });
 
-  // Calculate totals
-  const jamaEntries = entries.filter(entry => entry.type === 'जमा');
-  const naveEntries = entries.filter(entry => entry.type === 'नावे');
-  const totalJama = jamaEntries.reduce((sum, entry) => sum + entry.amount, 0);
-  const totalNave = naveEntries.reduce((sum, entry) => sum + entry.amount, 0);
-  const balance = totalJama - totalNave;
-
   // Format amount to show .00
   const formatAmount = (amount: number) => {
     return amount.toFixed(2);
@@ -599,7 +589,7 @@ const EntryPage: React.FC = () => {
       {/* Combined Header with School Building Background */}
       <div className="combined-header shadow-lg print:shadow-none">
         {/* School Header Section */}
-        <div className="school-header-section marathi-font">
+        <div className="school-header-section marathi-font print-account-title">
           टी झेड पवार माध्यमिक विद्यालय गोराणे ता. बागलाण जि. नाशिक
           </div>
         
@@ -1206,22 +1196,22 @@ const EntryPage: React.FC = () => {
                 <thead>
                   {/* Sub Headers */}
                   <tr className="bg-amber-500 text-white print:bg-gray-50 print:text-black">
-                    <th className="p-1 text-left marathi-font border border-black date-column text-center align-middle">तारीख</th>
-                    <th className="p-1 text-left marathi-font border border-black account-column text-center align-middle">खाते नं.</th>
-                    <th className="p-1 text-left marathi-font border border-black receipt-column text-center align-middle">पावती नं.</th>
-                    <th className="p-1 text-left marathi-font border border-black details-column text-center align-middle">
+                    <th className="p-1 text-left marathi-font border border-black date-column text-center align-middle print-column-accent">तारीख</th>
+                    <th className="p-1 text-left marathi-font border border-black account-column text-center align-middle print-column-accent">खाते नं.</th>
+                    <th className="p-1 text-left marathi-font border border-black receipt-column text-center align-middle print-column-accent">पावती नं.</th>
+                    <th className="p-1 text-left marathi-font border border-black details-column text-center align-middle print-column-accent">
                       <span className="print:hidden">जमेचा तपशील</span>
                       <span className="hidden print:inline">जमेचा तपशील</span>
                     </th>
-                    <th className="p-1 text-right marathi-font border border-black amount-column text-center align-middle">रक्कम</th>
-                    <th className="p-1 text-left marathi-font border border-black date-column text-center align-middle">तारीख</th>
-                    <th className="p-1 text-left marathi-font border border-black account-column text-center align-middle">खाते नं.</th>
-                    <th className="p-1 text-left marathi-font border border-black receipt-column text-center align-middle">पावती नं.</th>
-                    <th className="p-1 text-left marathi-font border border-black details-column text-center align-middle">
+                    <th className="p-1 text-right marathi-font border border-black amount-column text-center align-middle print-column-accent">रक्कम</th>
+                    <th className="p-1 text-left marathi-font border border-black date-column text-center align-middle print-column-accent">तारीख</th>
+                    <th className="p-1 text-left marathi-font border border-black account-column text-center align-middle print-column-accent">खाते नं.</th>
+                    <th className="p-1 text-left marathi-font border border-black receipt-column text-center align-middle print-column-accent">पावती नं.</th>
+                    <th className="p-1 text-left marathi-font border border-black details-column text-center align-middle print-column-accent">
                       <span className="print:hidden">नावेचा तपशील</span>
                       <span className="hidden print:inline">नावेचा तपशील</span>
                     </th>
-                    <th className="p-1 text-right marathi-font border border-black amount-column text-center align-middle">रक्कम</th>
+                    <th className="p-1 text-right marathi-font border border-black amount-column text-center align-middle print-column-accent">रक्कम</th>
                   </tr>
                 </thead>
                 {Object.entries(entriesByDate).map(([date, dateEntries], dateIndex, dateArray) => {
