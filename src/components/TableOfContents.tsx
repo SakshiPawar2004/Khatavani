@@ -592,7 +592,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ hideAdminHeader = fal
                 </div>
 
                 {/* Right Column */}
-                <div className="print:page-break-before-always">
+                <div>
                   <div className="bg-amber-500 text-white p-3 rounded-t-lg print:bg-gray-100 print:text-black print:rounded-none print:p-0.5">
                     <div className="grid grid-cols-12 gap-2 font-semibold text-sm marathi-font print:text-[6px] print:gap-1">
                       <div className="col-span-3 print:col-span-2">खाते नं.</div>

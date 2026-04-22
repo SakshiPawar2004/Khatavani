@@ -174,10 +174,6 @@
     page-break-after: always !important;
   }
   
-  [class~="print:page-break-before-always"] {
-    page-break-before: always !important;
-  }
-  
   table {
     font-size: 14px !important;
     border-collapse: collapse !important;
