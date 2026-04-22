@@ -589,7 +589,7 @@ const EntryPage: React.FC = () => {
       {/* Combined Header with School Building Background */}
       <div className="combined-header shadow-lg print:shadow-none">
         {/* School Header Section */}
-        <div className="school-header-section marathi-font print-account-title">
+        <div className="school-header-section marathi-font">
           टी झेड पवार माध्यमिक विद्यालय गोराणे ता. बागलाण जि. नाशिक
           </div>
         
