@@ -15,8 +15,8 @@ const highlightAccountName = (details: string, accounts: { [key: string]: string
   if (found) {
     // Remove any colons or spaces after the account name
     let rest = details.slice(found.length).replace(/^[:\s]+/, '');
-    // Add a single colon
-    return <span><span style={{color:'#1d4ed8', fontWeight:'bold'}}>{found}:</span>{rest ? ' ' + rest : ''}</span>;
+    // Add account name on first line, details on next line
+    return <span><span style={{color:'#1d4ed8', fontWeight:'bold'}}>{found}:</span>{rest ? <><br />{rest}</> : ''}</span>;
   }
   return details;
 };
@@ -546,6 +546,13 @@ const EntryPage: React.FC = () => {
   // Format amount to show .00
   const formatAmount = (amount: number) => {
     return amount.toFixed(2);
+  };
+
+  // Format amount with line break before .00 for display
+  const formatAmountWithBreak = (amount: number) => {
+    const formatted = amount.toFixed(2);
+    const parts = formatted.split('.');
+    return <><span>{parts[0]}</span><br /><span>.{parts[1]}</span></>;
   };
 
   // Delete all entries
@@ -1274,7 +1281,7 @@ const EntryPage: React.FC = () => {
                               )}
                             </td>
                             <td className="p-1 text-right font-medium english-font border border-black amount-column">
-                              {jamaEntry ? `${formatAmount(jamaEntry.amount)}` : ''}
+                              {jamaEntry ? formatAmountWithBreak(jamaEntry.amount) : ''}
                             </td>
                             
                             {/* नावे side columns */}
@@ -1319,7 +1326,7 @@ const EntryPage: React.FC = () => {
                               )}
                             </td>
                             <td className="p-1 text-right font-medium english-font border border-black amount-column">
-                              {naveEntry ? `${formatAmount(naveEntry.amount)}` : ''}
+                              {naveEntry ? formatAmountWithBreak(naveEntry.amount) : ''}
                             </td>
                           </tr>
                         );
@@ -1336,13 +1343,13 @@ const EntryPage: React.FC = () => {
                               एकूण:
                             </td>
                             <td className="p-2 text-right english-font border border-black">
-                              {formatAmount(dailyJamaTotal)}
+                              {formatAmountWithBreak(dailyJamaTotal)}
                             </td>
                             <td colSpan={4} className="p-2 text-right marathi-font border border-black">
                               एकूण:
                             </td>
                             <td className="p-2 text-right english-font border border-black">
-                              {formatAmount(dailyNaveTotal)}
+                              {formatAmountWithBreak(dailyNaveTotal)}
                             </td>
                           </tr>
                         );
@@ -1360,7 +1367,7 @@ const EntryPage: React.FC = () => {
                               शिल्लक:
                             </td>
                             <td className="p-2 text-right english-font border border-black">
-                              {formatAmount(Math.abs(dailyBalance))}
+                              {formatAmountWithBreak(Math.abs(dailyBalance))}
                             </td>
                           </tr>
                         );

@@ -464,3 +464,18 @@
 .compact-layout td {
   padding: 4px;
 }
+
+/* Amount column formatting for line breaks */
+.amount-column {
+  line-height: 1.4;
+  word-break: break-word;
+  white-space: normal;
+}
+
+/* Details column with line breaks after account name */
+.details-column {
+  line-height: 1.6;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
