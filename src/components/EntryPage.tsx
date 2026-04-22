@@ -1173,7 +1173,7 @@ const EntryPage: React.FC = () => {
         {/* Merged Entries Table with Daily Totals */}
         {entries.length > 0 && (
           <div className="bg-white rounded-lg page-shadow ledger-border p-4 print:shadow-none print:border-0 print:rounded-none print:p-1">
-            <h3 className="text-lg font-bold text-amber-800 marathi-font mb-4 text-center print:text-base print:mb-2">
+            <h3 className="text-lg font-bold text-amber-800 marathi-font mb-4 text-center print:text-base print:mb-2 print-account-title">
               किर्दवही नोंदी
             </h3>
             {isAdmin && (

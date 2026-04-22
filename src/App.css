@@ -444,7 +444,7 @@
   /* Accent color for important print headings */
   .print-column-accent,
   .print-account-title {
-    color: #9a3412 !important;
+    color: red !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
