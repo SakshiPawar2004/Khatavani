@@ -98,7 +98,7 @@
 @media print {
   * {
     -webkit-print-color-adjust: exact !important;
-    color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   
   body {
@@ -140,7 +140,7 @@
   }
   
   .school-header-section {
-    color: #9a3412 !important;
+    color: red !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -151,30 +151,30 @@
   }
   
   /* Optimize Table of Contents for 2-page layout */
-  .grid-cols-1.lg\\:grid-cols-2 {
+  [class~="grid-cols-1"][class~="lg:grid-cols-2"] {
     grid-template-columns: 1fr 1fr !important;
     gap: 0.5rem !important;
   }
   
   /* Make table cells more compact for खातेवही सूची */
-  .print\\:text-\\[6px\\] {
+  [class~="print:text-[6px]"] {
     font-size: 6px !important;
   }
   
-  .print\\:p-0\\.5 {
+  [class~="print:p-0.5"] {
     padding: 1px !important;
   }
   
-  .print\\:leading-tight {
+  [class~="print:leading-tight"] {
     line-height: 1.1 !important;
   }
   
   /* Ensure proper page breaks for खातेवही सूची */
-  .print\\:page-break-after-always {
+  [class~="print:page-break-after-always"] {
     page-break-after: always !important;
   }
   
-  .print\\:page-break-before-always {
+  [class~="print:page-break-before-always"] {
     page-break-before: always !important;
   }
   
@@ -265,131 +265,131 @@
     max-width: 10% !important;
   }
   
-  .print\\:hidden {
+  [class~="print:hidden"] {
     display: none !important;
   }
   
-  .print\\:block {
+  [class~="print:block"] {
     display: block !important;
   }
   
-  .print\\:text-xs {
+  [class~="print:text-xs"] {
     font-size: 12px !important;
   }
   
-  .print\\:text-\\[8px\\] {
+  [class~="print:text-[8px]"] {
     font-size: 14px !important;
   }
   
-  .print\\:text-\\[10px\\] {
+  [class~="print:text-[10px]"] {
     font-size: 14px !important;
   }
   
-  .print\\:p-1 {
+  [class~="print:p-1"] {
     padding: 2px !important;
   }
   
-  .print\\:mb-2 {
+  [class~="print:mb-2"] {
     margin-bottom: 4px !important;
   }
   
-  .print\\:mb-4 {
+  [class~="print:mb-4"] {
     margin-bottom: 8px !important;
   }
   
-  .print\\:px-2 {
+  [class~="print:px-2"] {
     padding-left: 4px !important;
     padding-right: 4px !important;
   }
   
-  .print\\:py-2 {
+  [class~="print:py-2"] {
     padding-top: 4px !important;
     padding-bottom: 4px !important;
   }
   
-  .print\\:border {
+  [class~="print:border"] {
     border: 1px solid #000 !important;
   }
   
-  .print\\:border-gray-400 {
+  [class~="print:border-gray-400"] {
     border-color: #000 !important;
   }
   
-  .print\\:border-gray-300 {
+  [class~="print:border-gray-300"] {
     border-color: #000 !important;
   }
   
-  .print\\:bg-gray-800 {
+  [class~="print:bg-gray-800"] {
     background-color: #f0f0f0 !important;
     color: black !important;
   }
   
-  .print\\:bg-gray-200 {
+  [class~="print:bg-gray-200"] {
     background-color: white !important;
     color: black !important;
   }
   
-  .print\\:bg-gray-300 {
+  [class~="print:bg-gray-300"] {
     background-color: white !important;
     color: black !important;
   }
   
-  .print\\:bg-gray-400 {
+  [class~="print:bg-gray-400"] {
     background-color: white !important;
     color: black !important;
   }
   
-  .print\\:bg-gray-100 {
+  [class~="print:bg-gray-100"] {
     background-color: white !important;
     color: black !important;
   }
   
-  .print\\:bg-gray-50 {
+  [class~="print:bg-gray-50"] {
     background-color: white !important;
     color: black !important;
   }
   
-  .print\\:col-span-4 {
+  [class~="print:col-span-4"] {
     grid-column: span 4 / span 4 !important;
   }
   
-  .print\\:col-span-8 {
+  [class~="print:col-span-8"] {
     grid-column: span 8 / span 8 !important;
   }
   
-  .print\\:no-underline {
+  [class~="print:no-underline"] {
     text-decoration: none !important;
   }
   
-  .print\\:hover\\:bg-transparent:hover {
+  [class~="print:hover:bg-transparent"]:hover {
     background-color: transparent !important;
   }
   
-  .print\\:text-base {
+  [class~="print:text-base"] {
     font-size: 14px !important;
   }
   
-  .print\\:text-lg {
+  [class~="print:text-lg"] {
     font-size: 16px !important;
   }
   
-  .print\\:w-3 {
+  [class~="print:w-3"] {
     width: 8px !important;
   }
   
-  .print\\:h-3 {
+  [class~="print:h-3"] {
     height: 8px !important;
   }
   
-  .print\\:shadow-none {
+  [class~="print:shadow-none"] {
     box-shadow: none !important;
   }
   
-  .print\\:border-0 {
+  [class~="print:border-0"] {
     border: none !important;
   }
   
-  .print\\:rounded-none {
+  [class~="print:rounded-none"] {
     border-radius: 0 !important;
   }
   
@@ -421,23 +421,23 @@
   }
   
   /* Compact grid layout for खातेवही सूची */
-  .print\\:grid-cols-2 {
+  [class~="print:grid-cols-2"] {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
     gap: 0.25rem !important;
   }
   
   /* Force smaller text for account names to fit better */
-  .print\\:text-\\[5px\\] {
+  [class~="print:text-[5px]"] {
     font-size: 12px !important;
   }
   
   /* Adjust column spans for better fit */
-  .print\\:col-span-2 {
+  [class~="print:col-span-2"] {
     grid-column: span 2 / span 2 !important;
   }
   
-  .print\\:col-span-6 {
+  [class~="print:col-span-6"] {
     grid-column: span 6 / span 6 !important;
   }
 
