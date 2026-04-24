@@ -446,18 +446,6 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ hideAdminHeader = fal
                 <Plus className="w-5 h-5" />
                 खाते जोडा
               </button>
-              <button
-                onClick={handleRepairAllMappings}
-                disabled={!isOnline || isRepairingMappings}
-                className={`px-6 py-3 rounded-lg font-medium marathi-font transition-colors inline-flex items-center gap-2 ${
-                  isOnline && !isRepairingMappings
-                    ? 'bg-amber-600 hover:bg-amber-700 text-white'
-                    : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                }`}
-              >
-                <Edit className="w-5 h-5" />
-                {isRepairingMappings ? 'दुरुस्ती सुरू...' : 'सर्व जुने व्यवहार दुरुस्त करा'}
-              </button>
             </div>
           )}
 
