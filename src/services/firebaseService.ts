@@ -3,6 +3,7 @@ import {
   collection, 
   doc, 
   getDocs, 
+  getDoc,
   addDoc, 
   updateDoc, 
   deleteDoc, 
@@ -35,6 +36,9 @@ export interface Entry {
 // Collections
 const ACCOUNTS_COLLECTION = 'accounts';
 const ENTRIES_COLLECTION = 'entries';
+
+const normalizeAccountNumber = (value: unknown): string => String(value ?? '').trim();
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 // Account operations
 export const accountsFirebase = {
@@ -93,6 +97,97 @@ export const accountsFirebase = {
   update: async (id: string, updates: Partial<Account>): Promise<void> => {
     try {
       const accountRef = doc(db, ACCOUNTS_COLLECTION, id);
+      
+      // If khateNumber (account number) is being changed, update all related entries
+      if (updates.khateNumber !== undefined) {
+        const accountSnapshot = await getDoc(accountRef);
+
+        if (accountSnapshot.exists()) {
+          const originalAccount = accountSnapshot.data() as Account;
+          const oldKhateNumber = normalizeAccountNumber(originalAccount.khateNumber);
+          const newKhateNumber = normalizeAccountNumber(updates.khateNumber);
+
+          if (oldKhateNumber !== newKhateNumber) {
+            const allAccountsSnapshot = await getDocs(collection(db, ACCOUNTS_COLLECTION));
+            const conflictingAccountDoc = allAccountsSnapshot.docs.find(
+              (accountDoc) =>
+                accountDoc.id !== id &&
+                normalizeAccountNumber((accountDoc.data() as Account).khateNumber) === newKhateNumber
+            );
+
+            const allEntriesSnapshot = await getDocs(collection(db, ENTRIES_COLLECTION));
+            const tempMarker = `__tmp_swap_${Date.now()}__`;
+
+            if (conflictingAccountDoc) {
+              // Swap mode: old->new and new->old without collisions.
+              const swapToTemp = allEntriesSnapshot.docs
+                .filter((entryDoc) => normalizeAccountNumber(entryDoc.data().accountNumber) === oldKhateNumber)
+                .map((entryDoc) => updateDoc(doc(db, ENTRIES_COLLECTION, entryDoc.id), { accountNumber: tempMarker }));
+              await Promise.all(swapToTemp);
+
+              const newToOld = allEntriesSnapshot.docs
+                .filter((entryDoc) => normalizeAccountNumber(entryDoc.data().accountNumber) === newKhateNumber)
+                .map((entryDoc) => updateDoc(doc(db, ENTRIES_COLLECTION, entryDoc.id), { accountNumber: oldKhateNumber }));
+              await Promise.all(newToOld);
+
+              const tempToNewSnapshot = await getDocs(collection(db, ENTRIES_COLLECTION));
+              const tempToNew = tempToNewSnapshot.docs
+                .filter((entryDoc) => normalizeAccountNumber(entryDoc.data().accountNumber) === tempMarker)
+                .map((entryDoc) => updateDoc(doc(db, ENTRIES_COLLECTION, entryDoc.id), { accountNumber: newKhateNumber }));
+              await Promise.all(tempToNew);
+
+              // Swap account numbers.
+              await updateDoc(doc(db, ACCOUNTS_COLLECTION, conflictingAccountDoc.id), {
+                khateNumber: oldKhateNumber
+              });
+            } else {
+              // Simple rename mode: move all old entries to new.
+              const oldToNew = allEntriesSnapshot.docs
+                .filter((entryDoc) => normalizeAccountNumber(entryDoc.data().accountNumber) === oldKhateNumber)
+                .map((entryDoc) => updateDoc(doc(db, ENTRIES_COLLECTION, entryDoc.id), { accountNumber: newKhateNumber }));
+              await Promise.all(oldToNew);
+            }
+
+            // Keep the normalized number in the account record.
+            updates.khateNumber = newKhateNumber;
+          } else {
+            // Repair mode: fix previously stale entries that still reference orphaned numbers.
+            const allAccountsSnapshot = await getDocs(collection(db, ACCOUNTS_COLLECTION));
+            const validAccountNumbers = new Set(
+              allAccountsSnapshot.docs.map((accountDoc) =>
+                normalizeAccountNumber((accountDoc.data() as Account).khateNumber)
+              )
+            );
+
+            const accountName = String(originalAccount.name ?? '').trim();
+            if (accountName) {
+              const accountNameRegex = new RegExp(`^\\s*${escapeRegExp(accountName)}(?:[:：\\s]|$)`);
+              const allEntriesSnapshot = await getDocs(collection(db, ENTRIES_COLLECTION));
+
+              const orphanRepairs = allEntriesSnapshot.docs
+                .filter((entryDoc) => {
+                  const entryData = entryDoc.data();
+                  const entryNumber = normalizeAccountNumber(entryData.accountNumber);
+                  const details = String(entryData.details ?? '');
+                  return (
+                    entryNumber !== oldKhateNumber &&
+                    !validAccountNumbers.has(entryNumber) &&
+                    accountNameRegex.test(details)
+                  );
+                })
+                .map((entryDoc) =>
+                  updateDoc(doc(db, ENTRIES_COLLECTION, entryDoc.id), {
+                    accountNumber: oldKhateNumber
+                  })
+                );
+
+              await Promise.all(orphanRepairs);
+            }
+          }
+        }
+      }
+
+      // Update the account itself
       await updateDoc(accountRef, updates);
     } catch (error) {
       console.error('Error updating account:', error);
@@ -120,6 +215,68 @@ export const accountsFirebase = {
       await deleteDoc(doc(db, ACCOUNTS_COLLECTION, id));
     } catch (error) {
       console.error('Error deleting account:', error);
+      throw error;
+    }
+  },
+
+  // Repair all entry-account mappings for previously changed account numbers
+  repairAllEntryMappings: async (): Promise<number> => {
+    try {
+      const accountsSnapshot = await getDocs(collection(db, ACCOUNTS_COLLECTION));
+      const entriesSnapshot = await getDocs(collection(db, ENTRIES_COLLECTION));
+
+      const accountList = accountsSnapshot.docs.map((accountDoc) => {
+        const accountData = accountDoc.data() as Account;
+        return {
+          khateNumber: normalizeAccountNumber(accountData.khateNumber),
+          name: String(accountData.name ?? '').trim()
+        };
+      });
+
+      const accountPatterns = accountList
+        .filter((account) => account.name.length > 0)
+        .sort((a, b) => b.name.length - a.name.length)
+        .map((account) => ({
+          khateNumber: account.khateNumber,
+          regex: new RegExp(`^\\s*${escapeRegExp(account.name)}(?:[:：\\s]|$)`)
+        }));
+
+      let updatedCount = 0;
+
+      const repairPromises = entriesSnapshot.docs
+        .map((entryDoc) => {
+          const entryData = entryDoc.data();
+          const normalizedCurrentNumber = normalizeAccountNumber(entryData.accountNumber);
+          const details = String(entryData.details ?? '');
+
+          let targetAccountNumber = normalizedCurrentNumber;
+          const matchedByDetails = accountPatterns.find((pattern) => pattern.regex.test(details));
+          if (matchedByDetails) {
+            targetAccountNumber = matchedByDetails.khateNumber;
+          }
+
+          if (targetAccountNumber && targetAccountNumber !== normalizedCurrentNumber) {
+            updatedCount += 1;
+            return updateDoc(doc(db, ENTRIES_COLLECTION, entryDoc.id), {
+              accountNumber: targetAccountNumber
+            });
+          }
+
+          // Also normalize legacy non-string values like 16 -> "16"
+          if (entryData.accountNumber !== normalizedCurrentNumber) {
+            updatedCount += 1;
+            return updateDoc(doc(db, ENTRIES_COLLECTION, entryDoc.id), {
+              accountNumber: normalizedCurrentNumber
+            });
+          }
+
+          return Promise.resolve();
+        });
+
+      await Promise.all(repairPromises);
+      return updatedCount;
+    } catch (error) {
+      console.error('Error repairing entry mappings:', error);
       throw error;
     }
   }
@@ -166,19 +323,21 @@ export const entriesFirebase = {
   // Get entries by account - simplified query
   getByAccount: async (accountNumber: string): Promise<Entry[]> => {
     try {
-      // Use only where clause to avoid composite index requirement
-      const q = query(
-        collection(db, ENTRIES_COLLECTION),
-        where('accountNumber', '==', accountNumber)
-      );
+      // Read all and filter in memory so legacy number/string mismatches still work.
+      const q = query(collection(db, ENTRIES_COLLECTION), orderBy('date'));
       const querySnapshot = await getDocs(q);
+      const requestedNumber = normalizeAccountNumber(accountNumber);
       
       const entries: Entry[] = [];
       querySnapshot.forEach((doc) => {
-        entries.push({
-          id: doc.id,
-          ...doc.data()
-        } as Entry);
+        const entryData = doc.data() as Entry;
+        if (normalizeAccountNumber(entryData.accountNumber) === requestedNumber) {
+          entries.push({
+            id: doc.id,
+            ...entryData,
+            accountNumber: normalizeAccountNumber(entryData.accountNumber)
+          } as Entry);
+        }
       });
       
       // Sort by date first, then by createdAt in memory

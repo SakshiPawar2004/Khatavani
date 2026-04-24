@@ -61,17 +61,27 @@ const LedgerPage: React.FC = () => {
       loadData();
     };
     
-    // Listen for account name updates
+    // Listen for account name/number updates and force reload
     const handleAccountUpdate = () => {
+      console.log('Account update detected in LedgerPage, reloading data...');
+      loadData();
+    };
+    
+    const handleEntriesReload = () => {
+      console.log('Entries reload requested in LedgerPage...');
       loadData();
     };
     
     window.addEventListener('focus', handleFocus);
     window.addEventListener('accountNameUpdated', handleAccountUpdate);
+    window.addEventListener('accountNumberChanged', handleAccountUpdate);
+    window.addEventListener('entriesNeedReload', handleEntriesReload);
     
     return () => {
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('accountNameUpdated', handleAccountUpdate);
+      window.removeEventListener('accountNumberChanged', handleAccountUpdate);
+      window.removeEventListener('entriesNeedReload', handleEntriesReload);
     };
   }, []);
   const loadData = async () => {

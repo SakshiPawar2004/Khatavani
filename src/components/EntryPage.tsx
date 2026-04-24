@@ -73,15 +73,25 @@ const EntryPage: React.FC = () => {
   useEffect(() => {
     loadData();
     
-    // Listen for account name updates
+    // Listen for account name/number updates and force reload
     const handleAccountUpdate = () => {
+      console.log('Account update detected, reloading data...');
+      loadData();
+    };
+    
+    const handleEntriesReload = () => {
+      console.log('Entries reload requested...');
       loadData();
     };
     
     window.addEventListener('accountNameUpdated', handleAccountUpdate);
+    window.addEventListener('accountNumberChanged', handleAccountUpdate);
+    window.addEventListener('entriesNeedReload', handleEntriesReload);
     
     return () => {
       window.removeEventListener('accountNameUpdated', handleAccountUpdate);
+      window.removeEventListener('accountNumberChanged', handleAccountUpdate);
+      window.removeEventListener('entriesNeedReload', handleEntriesReload);
     };
   }, []);
 

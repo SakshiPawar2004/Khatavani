@@ -33,6 +33,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ hideAdminHeader = fal
   const [editingAccount, setEditingAccount] = useState<string | null>(null);
   const [editAccountName, setEditAccountName] = useState('');
   const [editAccountNumber, setEditAccountNumber] = useState('');
+  const [isRepairingMappings, setIsRepairingMappings] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const { isAdmin, logout } = useAuth();
 
@@ -115,30 +116,34 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ hideAdminHeader = fal
     }
     
     if (editingAccount && editAccountName.trim() && editAccountNumber.trim()) {
-      // Check if the new account number already exists (only if it's different from current)
-      const currentAccount = accounts.find(acc => acc.id === editingAccount);
-      if (currentAccount && editAccountNumber !== currentAccount.khateNumber) {
-        const existingAccount = accounts.find(acc => acc.khateNumber === editAccountNumber.trim() && acc.id !== editingAccount);
-        if (existingAccount) {
-          alert('या खाते नंबरचे खाते आधीच अस्तित्वात आहे!');
-          return;
-        }
-      }
-      
       try {
+        // Show updating message
+        const updateButton = document.activeElement as HTMLElement;
+        const originalText = updateButton?.textContent;
+        
         await accountsFirebase.update(editingAccount, { 
           name: editAccountName.trim(),
           khateNumber: editAccountNumber.trim()
         });
+        
         setEditingAccount(null);
         setEditAccountName('');
         setEditAccountNumber('');
-        loadAccounts(); // Reload accounts
         
-        // Trigger a page refresh to update account names in other components
-        window.dispatchEvent(new Event('accountNameUpdated'));
+        // Reload accounts
+        await loadAccounts();
+        
+        // Dispatch event to notify all pages to reload
+        window.dispatchEvent(new Event('accountNumberChanged'));
+        
+        // Force reload of entry pages after a small delay
+        setTimeout(() => {
+          window.dispatchEvent(new Event('entriesNeedReload'));
+        }, 500);
       } catch (err) {
-        alert('खाते अपडेट करताना त्रुटी: ' + handleFirebaseError(err));
+        const errorMsg = handleFirebaseError(err);
+        alert('खाते अपडेट करताना त्रुटी: ' + errorMsg);
+        console.error('Account update error:', err);
       }
     }
   };
@@ -295,6 +300,32 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ hideAdminHeader = fal
     }
   };
 
+  const handleRepairAllMappings = async () => {
+    if (!isOnline || isRepairingMappings) {
+      return;
+    }
+
+    const confirmed = confirm('सर्व बदललेल्या खाते नंबरनुसार जुने व्यवहार दुरुस्त करायचे का?');
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setIsRepairingMappings(true);
+      const updatedCount = await accountsFirebase.repairAllEntryMappings();
+      await loadAccounts();
+
+      window.dispatchEvent(new Event('accountNumberChanged'));
+      window.dispatchEvent(new Event('entriesNeedReload'));
+
+      alert(`दुरुस्ती पूर्ण. ${updatedCount} व्यवहार अपडेट झाले.`);
+    } catch (err) {
+      alert('व्यवहार दुरुस्त करताना त्रुटी: ' + handleFirebaseError(err));
+    } finally {
+      setIsRepairingMappings(false);
+    }
+  };
+
   // Split accounts for better 2-page layout
   // Sort accounts numerically before splitting
   const sortedAccounts = [...accounts].sort((a, b) => {
@@ -414,6 +445,18 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ hideAdminHeader = fal
               >
                 <Plus className="w-5 h-5" />
                 खाते जोडा
+              </button>
+              <button
+                onClick={handleRepairAllMappings}
+                disabled={!isOnline || isRepairingMappings}
+                className={`px-6 py-3 rounded-lg font-medium marathi-font transition-colors inline-flex items-center gap-2 ${
+                  isOnline && !isRepairingMappings
+                    ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                    : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                }`}
+              >
+                <Edit className="w-5 h-5" />
+                {isRepairingMappings ? 'दुरुस्ती सुरू...' : 'सर्व जुने व्यवहार दुरुस्त करा'}
               </button>
             </div>
           )}
