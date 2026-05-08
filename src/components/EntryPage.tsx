@@ -214,72 +214,6 @@ const EntryPage: React.FC = () => {
     }
   };
 
-  const handleJamaSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isOnline) {
-      alert('इंटरनेट कनेक्शन नाही! कृपया ऑनलाइन येऊन पुन्हा प्रयत्न करा.');
-      return;
-    }
-    
-    if (jamaFormData.date) {
-      try {
-        await entriesFirebase.create({
-          date: jamaFormData.date,
-          accountNumber: jamaFormData.accountNumber,
-          receiptNumber: jamaFormData.receiptNumber || '',
-          details: jamaFormData.details,
-          amount: parseFloat(jamaFormData.amount),
-          type: 'जमा'
-        });
-        
-        setJamaFormData({
-          date: '',
-          accountNumber: '',
-          receiptNumber: '',
-          details: '',
-          amount: ''
-        });
-        
-        loadData(); // Reload entries
-      } catch (err) {
-        alert('जमा नोंद जोडताना त्रुटी: ' + handleFirebaseError(err));
-      }
-    }
-  };
-
-  const handleNaveSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isOnline) {
-      alert('इंटरनेट कनेक्शन नाही! कृपया ऑनलाइन येऊन पुन्हा प्रयत्न करा.');
-      return;
-    }
-    
-    if (naveFormData.date) {
-      try {
-        await entriesFirebase.create({
-          date: naveFormData.date,
-          accountNumber: naveFormData.accountNumber,
-          receiptNumber: naveFormData.receiptNumber || '',
-          details: naveFormData.details,
-          amount: parseFloat(naveFormData.amount),
-          type: 'नावे'
-        });
-        
-        setNaveFormData({
-          date: '',
-          accountNumber: '',
-          receiptNumber: '',
-          details: '',
-          amount: ''
-        });
-        
-        loadData(); // Reload entries
-      } catch (err) {
-        alert('नावे नोंद जोडताना त्रुटी: ' + handleFirebaseError(err));
-      }
-    }
-  };
-
   const handleJamaReset = () => {
     setJamaFormData({
       date: '',
@@ -789,7 +723,7 @@ const EntryPage: React.FC = () => {
                         value={jamaFormData.receiptNumber}
                         onChange={handleJamaInputChange}
                         disabled={!isOnline}
-                        placeholder="पापती नंबर"
+                        placeholder="पावती नंबर"
                         className={`w-full p-3 text-sm border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 marathi-font ${
                           !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
                         }`}
@@ -904,7 +838,7 @@ const EntryPage: React.FC = () => {
                         value={naveFormData.receiptNumber}
                         onChange={handleNaveInputChange}
                         disabled={!isOnline}
-                        placeholder="पापती नंबर"
+                        placeholder="पावती नंबर"
                         className={`w-full p-3 text-sm border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 marathi-font ${
                           !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
                         }`}
