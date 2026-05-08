@@ -781,7 +781,7 @@ const EntryPage: React.FC = () => {
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-sm font-medium text-green-800 marathi-font mb-2">
-                        पापती नंबर
+                        पावती नंबर
                       </label>
                       <input
                         type="text"
@@ -797,7 +797,7 @@ const EntryPage: React.FC = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-green-800 marathi-font mb-2">
-                        रकम
+                        रक्कम
                       </label>
                       <input
                         type="number"
@@ -896,7 +896,7 @@ const EntryPage: React.FC = () => {
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-sm font-medium text-red-800 marathi-font mb-2">
-                        पापती नंबर
+                        पावती नंबर
                       </label>
                       <input
                         type="text"
@@ -912,7 +912,7 @@ const EntryPage: React.FC = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-red-800 marathi-font mb-2">
-                        रकम
+                        रक्कम
                       </label>
                       <input
                         type="number"
