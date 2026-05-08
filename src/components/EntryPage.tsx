@@ -215,23 +215,23 @@ const EntryPage: React.FC = () => {
   };
 
   const handleJamaReset = () => {
-    setJamaFormData({
-      date: '',
+    setJamaFormData(prev => ({
+      ...prev,
       accountNumber: '',
       receiptNumber: '',
       details: '',
       amount: ''
-    });
+    }));
   };
 
   const handleNaveReset = () => {
-    setNaveFormData({
-      date: '',
+    setNaveFormData(prev => ({
+      ...prev,
       accountNumber: '',
       receiptNumber: '',
       details: '',
       amount: ''
-    });
+    }));
   };
 
   const handleEditEntry = (entry: Entry) => {
@@ -949,8 +949,20 @@ const EntryPage: React.FC = () => {
               </button>
               <button
                 onClick={() => {
-                  handleJamaReset();
-                  handleNaveReset();
+                  setJamaFormData({
+                    date: '',
+                    accountNumber: '',
+                    receiptNumber: '',
+                    details: '',
+                    amount: ''
+                  });
+                  setNaveFormData({
+                    date: '',
+                    accountNumber: '',
+                    receiptNumber: '',
+                    details: '',
+                    amount: ''
+                  });
                 }}
                 className="bg-gray-500 hover:bg-gray-600 text-white px-8 py-3 rounded-lg font-semibold english-font transition-colors flex items-center gap-2"
               >
