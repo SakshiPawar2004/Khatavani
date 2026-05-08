@@ -25,10 +25,10 @@ export interface Account {
 export interface Entry {
   id?: string;
   date: string;
-  accountNumber: string;
+  accountNumber?: string;
   receiptNumber?: string;
-  details: string;
-  amount: number;
+  details?: string;
+  amount?: number;
   type: 'जमा' | 'नावे';
   createdAt?: Timestamp | Date;
 }
@@ -364,15 +364,17 @@ export const entriesFirebase = {
   // Create new entry
   create: async (entry: Omit<Entry, 'id' | 'createdAt'>): Promise<Entry> => {
     try {
-      // Verify account exists
-      const accountsQuery = query(
-        collection(db, ACCOUNTS_COLLECTION),
-        where('khateNumber', '==', entry.accountNumber)
-      );
-      const accountsSnapshot = await getDocs(accountsQuery);
-      
-      if (accountsSnapshot.empty) {
-        throw new Error('Account not found');
+      // Verify account exists only if accountNumber is provided
+      if (entry.accountNumber && entry.accountNumber.trim()) {
+        const accountsQuery = query(
+          collection(db, ACCOUNTS_COLLECTION),
+          where('khateNumber', '==', entry.accountNumber)
+        );
+        const accountsSnapshot = await getDocs(accountsQuery);
+        
+        if (accountsSnapshot.empty) {
+          throw new Error('Account not found');
+        }
       }
 
       const docRef = await addDoc(collection(db, ENTRIES_COLLECTION), {

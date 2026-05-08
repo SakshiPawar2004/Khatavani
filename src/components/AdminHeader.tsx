@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Users, FileText, Settings, BarChart3 } from 'lucide-react';
-import { accountsFirebase, entriesFirebase, handleFirebaseError } from '../services/firebaseService';
+import { LogOut, Settings } from 'lucide-react';
+import { accountsFirebase, entriesFirebase } from '../services/firebaseService';
 
 interface AdminHeaderProps {
   title?: string;
@@ -43,8 +43,8 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
       const jamaEntries = entries.filter(entry => entry.type === 'जमा');
       const naveEntries = entries.filter(entry => entry.type === 'नावे');
       
-      const totalJama = jamaEntries.reduce((sum, entry) => sum + entry.amount, 0);
-      const totalNave = naveEntries.reduce((sum, entry) => sum + entry.amount, 0);
+      const totalJama = jamaEntries.reduce((sum, entry) => sum + (entry.amount || 0), 0);
+      const totalNave = naveEntries.reduce((sum, entry) => sum + (entry.amount || 0), 0);
       
       setStats({
         totalAccounts: accounts.length,

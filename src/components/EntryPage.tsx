@@ -221,7 +221,7 @@ const EntryPage: React.FC = () => {
       return;
     }
     
-    if (jamaFormData.date && jamaFormData.accountNumber && jamaFormData.details && jamaFormData.amount) {
+    if (jamaFormData.date) {
       try {
         await entriesFirebase.create({
           date: jamaFormData.date,
@@ -254,7 +254,7 @@ const EntryPage: React.FC = () => {
       return;
     }
     
-    if (naveFormData.date && naveFormData.accountNumber && naveFormData.details && naveFormData.amount) {
+    if (naveFormData.date) {
       try {
         await entriesFirebase.create({
           date: naveFormData.date,
@@ -304,10 +304,10 @@ const EntryPage: React.FC = () => {
     setEditingEntry(entry);
     setEditFormData({
       date: entry.date,
-      accountNumber: entry.accountNumber,
+      accountNumber: entry.accountNumber || '',
       receiptNumber: entry.receiptNumber || '',
-      details: entry.details,
-      amount: entry.amount.toString()
+      details: entry.details || '',
+      amount: (entry.amount || 0).toString()
     });
   };
 
@@ -350,7 +350,7 @@ const EntryPage: React.FC = () => {
       return;
     }
     
-    if (editingEntry && editFormData.date && editFormData.accountNumber && editFormData.details && editFormData.amount) {
+    if (editingEntry && editFormData.date) {
       try {
         await entriesFirebase.update(editingEntry.id!, {
           date: editFormData.date,
@@ -448,32 +448,32 @@ const EntryPage: React.FC = () => {
           'खाते नं.': jamaEntry ? jamaEntry.accountNumber : '',
           'पावती नं.': jamaEntry ? (jamaEntry.receiptNumber || '-') : '',
           'जमेचा तपशील': jamaEntry ? (() => {
-            const found = Object.values(accounts).find(name => jamaEntry.details.startsWith(name));
+            const found = Object.values(accounts).find(name => (jamaEntry.details || '').startsWith(name));
             if (found) {
-              let rest = jamaEntry.details.slice(found.length).replace(/^[:\s]+/, '');
+              let rest = (jamaEntry.details || '').slice(found.length).replace(/^[:\s]+/, '');
               return found + ':\n' + rest;
             }
-            return jamaEntry.details;
+            return jamaEntry.details || '';
           })() : '',
-          'रक्कम': jamaEntry ? jamaEntry.amount.toFixed(2) : '',
+          'रक्कम': jamaEntry ? (jamaEntry.amount || 0).toFixed(2) : '',
           'तारीख ': naveEntry ? formatDate(naveEntry.date) : '',
           'खाते नं. ': naveEntry ? naveEntry.accountNumber : '',
           'पावती नं. ': naveEntry ? (naveEntry.receiptNumber || '-') : '',
           'नावेचा तपशील': naveEntry ? (() => {
-            const found = Object.values(accounts).find(name => naveEntry.details.startsWith(name));
+            const found = Object.values(accounts).find(name => (naveEntry.details || '').startsWith(name));
             if (found) {
-              let rest = naveEntry.details.slice(found.length).replace(/^[:\s]+/, '');
+              let rest = (naveEntry.details || '').slice(found.length).replace(/^[:\s]+/, '');
               return found + ':\n' + rest;
             }
-            return naveEntry.details;
+            return naveEntry.details || '';
           })() : '',
-          'रक्कम ': naveEntry ? naveEntry.amount.toFixed(2) : ''
+          'रक्कम ': naveEntry ? (naveEntry.amount || 0).toFixed(2) : ''
         });
       }
       
       // Add daily totals
-      const dailyJamaTotal = jamaEntriesForDate.reduce((sum, entry) => sum + entry.amount, 0);
-      const dailyNaveTotal = naveEntriesForDate.reduce((sum, entry) => sum + entry.amount, 0);
+      const dailyJamaTotal = jamaEntriesForDate.reduce((sum, entry) => sum + (entry.amount || 0), 0);
+      const dailyNaveTotal = naveEntriesForDate.reduce((sum, entry) => sum + (entry.amount || 0), 0);
       
       excelData.push({
         'तारीख': '',
@@ -725,7 +725,7 @@ const EntryPage: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-green-800 marathi-font mb-1">
-                      खाते नंबर *
+                      खाते नंबर
                     </label>
                     <div className="flex gap-2">
                       <input
@@ -733,7 +733,6 @@ const EntryPage: React.FC = () => {
                         name="accountNumber"
                         value={jamaFormData.accountNumber}
                         onChange={handleJamaInputChange}
-                        required
                         disabled={!isOnline}
                         placeholder="खाते नंबर"
                         className={`flex-1 p-2 text-sm border border-green-300 rounded focus:ring-1 focus:ring-green-500 focus:border-green-500 marathi-font ${
@@ -784,7 +783,7 @@ const EntryPage: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-green-800 marathi-font mb-1">
-                      रक्कम *
+                      रक्कम
                     </label>
                     <input
                       type="number"
@@ -792,7 +791,6 @@ const EntryPage: React.FC = () => {
                       value={jamaFormData.amount}
                       onChange={handleJamaInputChange}
                       onBlur={(e) => handleAmountBlur('jama', e.target.value)}
-                      required
                       disabled={!isOnline}
                       placeholder="0.00"
                       step="0.01"
@@ -806,13 +804,12 @@ const EntryPage: React.FC = () => {
                 
                 <div className="mb-4">
                   <label className="block text-xs font-medium text-green-800 marathi-font mb-1">
-                    तपशील *
+                    तपशील
                   </label>
                   <textarea
                     name="details"
                     value={jamaFormData.details}
                     onChange={handleJamaInputChange}
-                    required
                     disabled={!isOnline}
                     placeholder="तपशील लिहा..."
                     rows={4}
@@ -873,7 +870,7 @@ const EntryPage: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-red-800 marathi-font mb-1">
-                      खाते नंबर *
+                      खाते नंबर
                     </label>
                     <div className="flex gap-2">
                       <input
@@ -881,7 +878,6 @@ const EntryPage: React.FC = () => {
                         name="accountNumber"
                         value={naveFormData.accountNumber}
                         onChange={handleNaveInputChange}
-                        required
                         disabled={!isOnline}
                         placeholder="खाते नंबर"
                         className={`flex-1 p-2 text-sm border border-red-300 rounded focus:ring-1 focus:ring-red-500 focus:border-red-500 marathi-font ${
@@ -932,7 +928,7 @@ const EntryPage: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-red-800 marathi-font mb-1">
-                      रक्कम *
+                      रक्कम
                     </label>
                     <input
                       type="number"
@@ -940,7 +936,6 @@ const EntryPage: React.FC = () => {
                       value={naveFormData.amount}
                       onChange={handleNaveInputChange}
                       onBlur={(e) => handleAmountBlur('nave', e.target.value)}
-                      required
                       disabled={!isOnline}
                       placeholder="0.00"
                       step="0.01"
@@ -954,13 +949,12 @@ const EntryPage: React.FC = () => {
                 
                 <div className="mb-4">
                   <label className="block text-xs font-medium text-red-800 marathi-font mb-1">
-                    तपशील *
+                    तपशील
                   </label>
                   <textarea
                     name="details"
                     value={naveFormData.details}
                     onChange={handleNaveInputChange}
-                    required
                     disabled={!isOnline}
                     placeholder="तपशील लिहा..."
                     rows={4}
@@ -1043,14 +1037,13 @@ const EntryPage: React.FC = () => {
                     <label className={`block text-sm font-medium mb-2 marathi-font ${
                       editingEntry.type === 'जमा' ? 'text-green-800' : 'text-red-800'
                     }`}>
-                      खाते नंबर *
+                      खाते नंबर
                     </label>
                     <input
                       type="text"
                       name="accountNumber"
                       value={editFormData.accountNumber}
                       onChange={handleEditInputChange}
-                      required
                       disabled={!isOnline}
                       placeholder="खाते नंबर"
                       className={`w-full p-3 text-sm border rounded-lg focus:ring-2 focus:ring-opacity-50 marathi-font ${
@@ -1084,7 +1077,7 @@ const EntryPage: React.FC = () => {
                     <label className={`block text-sm font-medium mb-2 marathi-font ${
                       editingEntry.type === 'जमा' ? 'text-green-800' : 'text-red-800'
                     }`}>
-                      रक्कम *
+                      रक्कम
                     </label>
                     <input
                       type="number"
@@ -1092,7 +1085,6 @@ const EntryPage: React.FC = () => {
                       value={editFormData.amount}
                       onChange={handleEditInputChange}
                       onBlur={(e) => handleEditAmountBlur(e.target.value)}
-                      required
                       disabled={!isOnline}
                       placeholder="0.00"
                       step="0.01"
@@ -1110,13 +1102,12 @@ const EntryPage: React.FC = () => {
                   <label className={`block text-sm font-medium mb-2 marathi-font ${
                     editingEntry.type === 'जमा' ? 'text-green-800' : 'text-red-800'
                   }`}>
-                    तपशील *
+                    तपशील
                   </label>
                   <textarea
                     name="details"
                     value={editFormData.details}
                     onChange={handleEditInputChange}
-                    required
                     disabled={!isOnline}
                     placeholder="तपशील लिहा..."
                     rows={4}
@@ -1247,10 +1238,10 @@ const EntryPage: React.FC = () => {
                               {jamaEntry ? jamaEntry.accountNumber : ''}
                             </td>
                             <td className="p-1 marathi-font border border-black receipt-column text-center align-middle">
-                              {jamaEntry ? (jamaEntry.receiptNumber || '-') : ''}
+                              {jamaEntry && (jamaEntry.accountNumber || jamaEntry.details || jamaEntry.amount) ? (jamaEntry.receiptNumber || '-') : ''}
                             </td>
                             <td className="p-1 marathi-font leading-relaxed border border-black details-column text-wrap">
-                              {jamaEntry ? highlightAccountName(jamaEntry.details, accounts) : ''}
+                              {jamaEntry ? highlightAccountName(jamaEntry.details || '', accounts) : ''}
                               {jamaEntry && jamaEntry.id && isAdmin && (
                                 <>
                                   <button
@@ -1281,7 +1272,7 @@ const EntryPage: React.FC = () => {
                               )}
                             </td>
                             <td className="p-1 text-right font-medium english-font border border-black amount-column">
-                              {jamaEntry ? formatAmountWithBreak(jamaEntry.amount) : ''}
+                              {jamaEntry ? formatAmountWithBreak(jamaEntry.amount || 0) : ''}
                             </td>
                             
                             {/* नावे side columns */}
@@ -1292,10 +1283,10 @@ const EntryPage: React.FC = () => {
                               {naveEntry ? naveEntry.accountNumber : ''}
                             </td>
                             <td className="p-1 marathi-font border border-black receipt-column text-center align-middle">
-                              {naveEntry ? (naveEntry.receiptNumber || '-') : ''}
+                              {naveEntry && (naveEntry.accountNumber || naveEntry.details || naveEntry.amount) ? (naveEntry.receiptNumber || '-') : ''}
                             </td>
                             <td className="p-1 marathi-font leading-relaxed border border-black details-column text-wrap">
-                              {naveEntry ? highlightAccountName(naveEntry.details, accounts) : ''}
+                              {naveEntry ? highlightAccountName(naveEntry.details || '', accounts) : ''}
                               {naveEntry && naveEntry.id && isAdmin && (
                                 <>
                                   <button
@@ -1326,7 +1317,7 @@ const EntryPage: React.FC = () => {
                               )}
                             </td>
                             <td className="p-1 text-right font-medium english-font border border-black amount-column">
-                              {naveEntry ? formatAmountWithBreak(naveEntry.amount) : ''}
+                              {naveEntry ? formatAmountWithBreak(naveEntry.amount || 0) : ''}
                             </td>
                           </tr>
                         );
@@ -1334,8 +1325,8 @@ const EntryPage: React.FC = () => {
                       
                       {/* Add daily total row */}
                       {(() => {
-                        const dailyJamaTotal = jamaEntriesForDate.reduce((sum, entry) => sum + entry.amount, 0);
-                        const dailyNaveTotal = naveEntriesForDate.reduce((sum, entry) => sum + entry.amount, 0);
+                        const dailyJamaTotal = jamaEntriesForDate.reduce((sum, entry) => sum + (entry.amount || 0), 0);
+                        const dailyNaveTotal = naveEntriesForDate.reduce((sum, entry) => sum + (entry.amount || 0), 0);
                         
                         return (
                           <tr className="daily-total-row bg-blue-100 font-medium print:bg-gray-100 print-page-break-inside-avoid">
@@ -1357,8 +1348,8 @@ const EntryPage: React.FC = () => {
 
                       {/* Add शिल्लक row after each date */}
                       {(() => {
-                        const dailyJamaTotal = jamaEntriesForDate.reduce((sum, entry) => sum + entry.amount, 0);
-                        const dailyNaveTotal = naveEntriesForDate.reduce((sum, entry) => sum + entry.amount, 0);
+                        const dailyJamaTotal = jamaEntriesForDate.reduce((sum, entry) => sum + (entry.amount || 0), 0);
+                        const dailyNaveTotal = naveEntriesForDate.reduce((sum, entry) => sum + (entry.amount || 0), 0);
                         const dailyBalance = dailyJamaTotal - dailyNaveTotal;
                         
                         return (
