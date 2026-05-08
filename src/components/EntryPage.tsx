@@ -698,33 +698,44 @@ const EntryPage: React.FC = () => {
 
         {/* Entry Forms */}
         {isAdmin && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 print:hidden">
-            {/* जमा Entry Form */}
-            <div className="bg-white rounded-lg page-shadow ledger-border p-4">
-              <div className="text-center mb-4">
-                <h2 className="text-xl font-bold text-green-800 marathi-font">जमा नोंद</h2>
-              </div>
+          <div className="bg-white rounded-lg page-shadow ledger-border p-6 mb-6 print:hidden">
+            {/* Shared Date Input */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 marathi-font mb-2">
+                तारीख *
+              </label>
+              <input
+                type="date"
+                value={jamaFormData.date}
+                onChange={(e) => {
+                  setJamaFormData(prev => ({ ...prev, date: e.target.value }));
+                  setNaveFormData(prev => ({ ...prev, date: e.target.value }));
+                }}
+                required
+                disabled={!isOnline}
+                className={`w-full p-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
+                }`}
+              />
+            </div>
 
-              <form onSubmit={handleJamaSubmit} className="bg-green-50 p-4 rounded-lg border-2 border-green-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-xs font-medium text-green-800 marathi-font mb-1">
-                      तारीख *
-                    </label>
-                    <input
-                      type="date"
-                      name="date"
-                      value={jamaFormData.date}
-                      onChange={handleJamaInputChange}
-                      required
-                      disabled={!isOnline}
-                      className={`w-full p-2 text-sm border border-green-300 rounded focus:ring-1 focus:ring-green-500 focus:border-green-500 ${
-                        !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
-                      }`}
-                    />
+            {/* Two Column Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* जमा Entry Form */}
+              <div className="bg-green-50 p-6 rounded-lg border-2 border-green-200">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="text-green-600">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M12 7a1 1 0 110-2h.01a1 1 0 110 2H12zm-2 2a1 1 0 100 2h.01a1 1 0 100-2h-.01zm3 0a1 1 0 100 2h.01a1 1 0 100-2h-.01z" clipRule="evenodd" />
+                    </svg>
                   </div>
+                  <h2 className="text-lg font-bold text-green-800 marathi-font">जमा नोद</h2>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Account Number Row */}
                   <div>
-                    <label className="block text-xs font-medium text-green-800 marathi-font mb-1">
+                    <label className="block text-sm font-medium text-green-800 marathi-font mb-2">
                       खाते नंबर
                     </label>
                     <div className="flex gap-2">
@@ -735,7 +746,7 @@ const EntryPage: React.FC = () => {
                         onChange={handleJamaInputChange}
                         disabled={!isOnline}
                         placeholder="खाते नंबर"
-                        className={`flex-1 p-2 text-sm border border-green-300 rounded focus:ring-1 focus:ring-green-500 focus:border-green-500 marathi-font ${
+                        className={`flex-1 p-3 text-sm border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 marathi-font ${
                           !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
                         }`}
                       />
@@ -749,127 +760,97 @@ const EntryPage: React.FC = () => {
                           setShowAddAccountForm(true);
                         }}
                         disabled={!isOnline}
-                        className={`p-2 rounded text-xs ${
+                        className={`p-3 rounded-lg text-sm font-medium ${
                           isOnline 
                             ? 'bg-blue-500 hover:bg-blue-600 text-white' 
                             : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         }`}
                         title="नवीन खाते जोडा"
                       >
-                        <Plus className="w-3 h-3" />
+                        <Plus className="w-4 h-4" />
                       </button>
                     </div>
                     {jamaFormData.accountNumber && accounts[jamaFormData.accountNumber] && (
-                      <p className="text-xs text-green-600 mt-1 marathi-font">
+                      <p className="text-sm text-green-600 mt-1 marathi-font">
                         ✓ {accounts[jamaFormData.accountNumber]}
                       </p>
                     )}
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-green-800 marathi-font mb-1">
-                      पावती नंबर
-                    </label>
-                    <input
-                      type="text"
-                      name="receiptNumber"
-                      value={jamaFormData.receiptNumber}
-                      onChange={handleJamaInputChange}
-                      disabled={!isOnline}
-                      placeholder="पावती नंबर"
-                      className={`w-full p-2 text-sm border border-green-300 rounded focus:ring-1 focus:ring-green-500 focus:border-green-500 marathi-font ${
-                        !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
-                      }`}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-green-800 marathi-font mb-1">
-                      रक्कम
-                    </label>
-                    <input
-                      type="number"
-                      name="amount"
-                      value={jamaFormData.amount}
-                      onChange={handleJamaInputChange}
-                      onBlur={(e) => handleAmountBlur('jama', e.target.value)}
-                      disabled={!isOnline}
-                      placeholder="0.00"
-                      step="0.01"
-                      min="0"
-                      className={`w-full p-2 text-sm border border-green-300 rounded focus:ring-1 focus:ring-green-500 focus:border-green-500 english-font ${
-                        !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
-                      }`}
-                    />
-                  </div>
-                </div>
-                
-                <div className="mb-4">
-                  <label className="block text-xs font-medium text-green-800 marathi-font mb-1">
-                    तपशील
-                  </label>
-                  <textarea
-                    name="details"
-                    value={jamaFormData.details}
-                    onChange={handleJamaInputChange}
-                    disabled={!isOnline}
-                    placeholder="तपशील लिहा..."
-                    rows={4}
-                    className={`w-full p-2 text-sm border border-green-300 rounded focus:ring-1 focus:ring-green-500 focus:border-green-500 marathi-font resize-vertical ${
-                      !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
-                    }`}
-                  />
-                </div>
-                
-                <div className="flex flex-wrap gap-3 justify-center">
-                  <button
-                    type="submit"
-                    disabled={!isOnline}
-                    className={`px-6 py-2 rounded font-medium english-font transition-colors flex items-center gap-2 text-sm ${
-                      isOnline 
-                        ? 'bg-green-600 hover:bg-green-700 text-white' 
-                        : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                    }`}
-                  >
-                    <Save className="w-4 h-4" />
-                    Save Entry
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleJamaReset}
-                    className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded font-medium english-font transition-colors flex items-center gap-2 text-sm"
-                  >
-                    <X className="w-4 h-4" />
-                    Reset Form
-                  </button>
-                </div>
-              </form>
-            </div>
 
-            {/* नावे Entry Form */}
-            <div className="bg-white rounded-lg page-shadow ledger-border p-4">
-              <div className="text-center mb-4">
-                <h2 className="text-xl font-bold text-red-800 marathi-font">नावे नोंद</h2>
+                  {/* Receipt Number and Amount Row */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-green-800 marathi-font mb-2">
+                        पापती नंबर
+                      </label>
+                      <input
+                        type="text"
+                        name="receiptNumber"
+                        value={jamaFormData.receiptNumber}
+                        onChange={handleJamaInputChange}
+                        disabled={!isOnline}
+                        placeholder="पापती नंबर"
+                        className={`w-full p-3 text-sm border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 marathi-font ${
+                          !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
+                        }`}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-green-800 marathi-font mb-2">
+                        रकम
+                      </label>
+                      <input
+                        type="number"
+                        name="amount"
+                        value={jamaFormData.amount}
+                        onChange={handleJamaInputChange}
+                        onBlur={(e) => handleAmountBlur('jama', e.target.value)}
+                        disabled={!isOnline}
+                        placeholder="0.00"
+                        step="0.01"
+                        min="0"
+                        className={`w-full p-3 text-sm border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 english-font ${
+                          !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
+                        }`}
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Details Textarea */}
+                  <div>
+                    <label className="block text-sm font-medium text-green-800 marathi-font mb-2">
+                      तपशील
+                    </label>
+                    <textarea
+                      name="details"
+                      value={jamaFormData.details}
+                      onChange={handleJamaInputChange}
+                      disabled={!isOnline}
+                      placeholder="तपशील लिहा..."
+                      rows={5}
+                      className={`w-full p-3 text-sm border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 marathi-font resize-vertical ${
+                        !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
+                      }`}
+                    />
+                  </div>
+                </div>
               </div>
 
-              <form onSubmit={handleNaveSubmit} className="bg-red-50 p-4 rounded-lg border-2 border-red-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-xs font-medium text-red-800 marathi-font mb-1">
-                      तारीख *
-                    </label>
-                    <input
-                      type="date"
-                      name="date"
-                      value={naveFormData.date}
-                      onChange={handleNaveInputChange}
-                      required
-                      disabled={!isOnline}
-                      className={`w-full p-2 text-sm border border-red-300 rounded focus:ring-1 focus:ring-red-500 focus:border-red-500 ${
-                        !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
-                      }`}
-                    />
+              {/* नावे Entry Form */}
+              <div className="bg-red-50 p-6 rounded-lg border-2 border-red-200">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="text-red-600">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M12 7a1 1 0 110-2h.01a1 1 0 110 2H12zm-2 2a1 1 0 100 2h.01a1 1 0 100-2h-.01zm3 0a1 1 0 100 2h.01a1 1 0 100-2h-.01z" clipRule="evenodd" />
+                    </svg>
                   </div>
+                  <h2 className="text-lg font-bold text-red-800 marathi-font">नावे नोद</h2>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Account Number Row */}
                   <div>
-                    <label className="block text-xs font-medium text-red-800 marathi-font mb-1">
+                    <label className="block text-sm font-medium text-red-800 marathi-font mb-2">
                       खाते नंबर
                     </label>
                     <div className="flex gap-2">
@@ -880,7 +861,7 @@ const EntryPage: React.FC = () => {
                         onChange={handleNaveInputChange}
                         disabled={!isOnline}
                         placeholder="खाते नंबर"
-                        className={`flex-1 p-2 text-sm border border-red-300 rounded focus:ring-1 focus:ring-red-500 focus:border-red-500 marathi-font ${
+                        className={`flex-1 p-3 text-sm border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 marathi-font ${
                           !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
                         }`}
                       />
@@ -894,99 +875,154 @@ const EntryPage: React.FC = () => {
                           setShowAddAccountForm(true);
                         }}
                         disabled={!isOnline}
-                        className={`p-2 rounded text-xs ${
+                        className={`p-3 rounded-lg text-sm font-medium ${
                           isOnline 
                             ? 'bg-blue-500 hover:bg-blue-600 text-white' 
                             : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         }`}
                         title="नवीन खाते जोडा"
                       >
-                        <Plus className="w-3 h-3" />
+                        <Plus className="w-4 h-4" />
                       </button>
                     </div>
                     {naveFormData.accountNumber && accounts[naveFormData.accountNumber] && (
-                      <p className="text-xs text-red-600 mt-1 marathi-font">
+                      <p className="text-sm text-red-600 mt-1 marathi-font">
                         ✓ {accounts[naveFormData.accountNumber]}
                       </p>
                     )}
                   </div>
+
+                  {/* Receipt Number and Amount Row */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-red-800 marathi-font mb-2">
+                        पापती नंबर
+                      </label>
+                      <input
+                        type="text"
+                        name="receiptNumber"
+                        value={naveFormData.receiptNumber}
+                        onChange={handleNaveInputChange}
+                        disabled={!isOnline}
+                        placeholder="पापती नंबर"
+                        className={`w-full p-3 text-sm border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 marathi-font ${
+                          !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
+                        }`}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-red-800 marathi-font mb-2">
+                        रकम
+                      </label>
+                      <input
+                        type="number"
+                        name="amount"
+                        value={naveFormData.amount}
+                        onChange={handleNaveInputChange}
+                        onBlur={(e) => handleAmountBlur('nave', e.target.value)}
+                        disabled={!isOnline}
+                        placeholder="0.00"
+                        step="0.01"
+                        min="0"
+                        className={`w-full p-3 text-sm border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 english-font ${
+                          !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
+                        }`}
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Details Textarea */}
                   <div>
-                    <label className="block text-xs font-medium text-red-800 marathi-font mb-1">
-                      पावती नंबर
+                    <label className="block text-sm font-medium text-red-800 marathi-font mb-2">
+                      तपशील
                     </label>
-                    <input
-                      type="text"
-                      name="receiptNumber"
-                      value={naveFormData.receiptNumber}
+                    <textarea
+                      name="details"
+                      value={naveFormData.details}
                       onChange={handleNaveInputChange}
                       disabled={!isOnline}
-                      placeholder="पावती नंबर"
-                      className={`w-full p-2 text-sm border border-red-300 rounded focus:ring-1 focus:ring-red-500 focus:border-red-500 marathi-font ${
+                      placeholder="तपशील लिहा..."
+                      rows={5}
+                      className={`w-full p-3 text-sm border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 marathi-font resize-vertical ${
                         !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
                       }`}
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-red-800 marathi-font mb-1">
-                      रक्कम
-                    </label>
-                    <input
-                      type="number"
-                      name="amount"
-                      value={naveFormData.amount}
-                      onChange={handleNaveInputChange}
-                      onBlur={(e) => handleAmountBlur('nave', e.target.value)}
-                      disabled={!isOnline}
-                      placeholder="0.00"
-                      step="0.01"
-                      min="0"
-                      className={`w-full p-2 text-sm border border-red-300 rounded focus:ring-1 focus:ring-red-500 focus:border-red-500 english-font ${
-                        !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
-                      }`}
-                    />
-                  </div>
                 </div>
-                
-                <div className="mb-4">
-                  <label className="block text-xs font-medium text-red-800 marathi-font mb-1">
-                    तपशील
-                  </label>
-                  <textarea
-                    name="details"
-                    value={naveFormData.details}
-                    onChange={handleNaveInputChange}
-                    disabled={!isOnline}
-                    placeholder="तपशील लिहा..."
-                    rows={4}
-                    className={`w-full p-2 text-sm border border-red-300 rounded focus:ring-1 focus:ring-red-500 focus:border-red-500 marathi-font resize-vertical ${
-                      !isOnline ? 'bg-gray-100 cursor-not-allowed' : ''
-                    }`}
-                  />
-                </div>
-                
-                <div className="flex flex-wrap gap-3 justify-center">
-                  <button
-                    type="submit"
-                    disabled={!isOnline}
-                    className={`px-6 py-2 rounded font-medium english-font transition-colors flex items-center gap-2 text-sm ${
-                      isOnline 
-                        ? 'bg-red-600 hover:bg-red-700 text-white' 
-                        : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                    }`}
-                  >
-                    <Save className="w-4 h-4" />
-                    Save Entry
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleNaveReset}
-                    className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded font-medium english-font transition-colors flex items-center gap-2 text-sm"
-                  >
-                    <X className="w-4 h-4" />
-                    Reset Form
-                  </button>
-                </div>
-              </form>
+              </div>
+            </div>
+
+            {/* Unified Save and Reset Buttons */}
+            <div className="flex flex-wrap gap-4 justify-center mt-6">
+              <button
+                onClick={async (e) => {
+                  e.preventDefault();
+                  if (!isOnline) {
+                    alert('इंटरनेट कनेक्शन नाही! कृपया ऑनलाइन येऊन पुन्हा प्रयत्न करा.');
+                    return;
+                  }
+
+                  const hasJamaData = jamaFormData.date || jamaFormData.accountNumber || jamaFormData.amount;
+                  const hasNaveData = naveFormData.date || naveFormData.accountNumber || naveFormData.amount;
+
+                  if (!hasJamaData && !hasNaveData) {
+                    alert('कृपया कम से कम एक नोद भरा!');
+                    return;
+                  }
+
+                  try {
+                    // Save Jama entry if it has data
+                    if (hasJamaData && jamaFormData.date) {
+                      await entriesFirebase.create({
+                        date: jamaFormData.date,
+                        accountNumber: jamaFormData.accountNumber,
+                        receiptNumber: jamaFormData.receiptNumber || '',
+                        details: jamaFormData.details,
+                        amount: jamaFormData.amount ? parseFloat(jamaFormData.amount) : 0,
+                        type: 'जमा'
+                      });
+                    }
+
+                    // Save Nave entry if it has data
+                    if (hasNaveData && naveFormData.date) {
+                      await entriesFirebase.create({
+                        date: naveFormData.date,
+                        accountNumber: naveFormData.accountNumber,
+                        receiptNumber: naveFormData.receiptNumber || '',
+                        details: naveFormData.details,
+                        amount: naveFormData.amount ? parseFloat(naveFormData.amount) : 0,
+                        type: 'नावे'
+                      });
+                    }
+
+                    // Reset forms
+                    handleJamaReset();
+                    handleNaveReset();
+                    loadData();
+                  } catch (err) {
+                    alert('नोद जोडताना त्रुटी: ' + handleFirebaseError(err));
+                  }
+                }}
+                disabled={!isOnline}
+                className={`px-8 py-3 rounded-lg font-semibold english-font transition-colors flex items-center gap-2 ${
+                  isOnline
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                    : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                }`}
+              >
+                <Save className="w-5 h-5" />
+                Save Entry
+              </button>
+              <button
+                onClick={() => {
+                  handleJamaReset();
+                  handleNaveReset();
+                }}
+                className="bg-gray-500 hover:bg-gray-600 text-white px-8 py-3 rounded-lg font-semibold english-font transition-colors flex items-center gap-2"
+              >
+                <X className="w-5 h-5" />
+                Reset Form
+              </button>
             </div>
           </div>
         )}
