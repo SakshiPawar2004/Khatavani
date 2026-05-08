@@ -1232,7 +1232,7 @@ const EntryPage: React.FC = () => {
                           <tr key={`${date}-${i}`} className="hover:bg-amber-50 transition-colors border-b print:hover:bg-transparent print:bg-white print-page-break-inside-avoid">
                             {/* जमा side columns */}
                             <td className="p-1 english-font border border-black date-column text-center align-middle">
-                              {jamaEntry ? formatDate(jamaEntry.date) : ''}
+                              {jamaEntry && (jamaEntry.accountNumber || jamaEntry.details || jamaEntry.amount) ? formatDate(jamaEntry.date) : ''}
                             </td>
                             <td className="p-1 marathi-font font-medium border border-black account-column text-center align-middle">
                               {jamaEntry ? jamaEntry.accountNumber : ''}
@@ -1272,12 +1272,12 @@ const EntryPage: React.FC = () => {
                               )}
                             </td>
                             <td className="p-1 text-right font-medium english-font border border-black amount-column">
-                              {jamaEntry ? formatAmountWithBreak(jamaEntry.amount || 0) : ''}
+                              {jamaEntry && (jamaEntry.accountNumber || jamaEntry.details || jamaEntry.amount) ? formatAmountWithBreak(jamaEntry.amount || 0) : ''}
                             </td>
                             
                             {/* नावे side columns */}
                             <td className="p-1 english-font border border-black date-column text-center align-middle">
-                              {naveEntry ? formatDate(naveEntry.date) : ''}
+                              {naveEntry && (naveEntry.accountNumber || naveEntry.details || naveEntry.amount) ? formatDate(naveEntry.date) : ''}
                             </td>
                             <td className="p-1 marathi-font font-medium border border-black account-column text-center align-middle">
                               {naveEntry ? naveEntry.accountNumber : ''}
@@ -1317,7 +1317,7 @@ const EntryPage: React.FC = () => {
                               )}
                             </td>
                             <td className="p-1 text-right font-medium english-font border border-black amount-column">
-                              {naveEntry ? formatAmountWithBreak(naveEntry.amount || 0) : ''}
+                              {naveEntry && (naveEntry.accountNumber || naveEntry.details || naveEntry.amount) ? formatAmountWithBreak(naveEntry.amount || 0) : ''}
                             </td>
                           </tr>
                         );
